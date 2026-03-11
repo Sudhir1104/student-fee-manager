@@ -63,7 +63,30 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 </div>
 
 <script type="module">
+function sendReminders(){
 
+students.forEach((s)=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+if(!s.paid && today>due){
+
+let diff=Math.floor((today-due)/(1000*60*60*24));
+let late=diff*10;
+let total=parseInt(s.fee)+late;
+
+let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+
+let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
+
+window.open(link,'_blank');
+
+}
+
+});
+
+}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
