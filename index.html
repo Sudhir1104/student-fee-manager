@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Student Fee Manager</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA support -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d89ef">
 
 <style>
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
@@ -102,7 +107,9 @@ text-decoration:none
 
 <h3>Add Student</h3>
 
-<button class="reminder-btn" onclick="sendReminders()">Send reminders to overdue parents</button>
+<button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
+Send reminders (0 overdue)
+</button>
 
 <input id="name" placeholder="Student Name">
 <input id="phone" placeholder="Parent Phone (e.g. 919876543210)">
@@ -316,6 +323,9 @@ document.getElementById("students").innerText="Students: "+students.length;
 document.getElementById("collected").innerText="Collected: ₹"+collected;
 document.getElementById("pending").innerText="Pending: ₹"+pending;
 document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+
+document.getElementById("reminderButton").innerText=
+"Send reminders ("+overdueCount+" overdue)";
 
 }
 
