@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Student Fee Manager Pro</title>
+<title>Student Fee Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
@@ -18,9 +17,9 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 .card{flex:1;background:#2d89ef;color:white;padding:15px;border-radius:8px;min-width:180px}
 .whatsapp{background:#25D366;color:white;padding:5px 10px;border-radius:5px;text-decoration:none}
 .paid{background:#4CAF50}
-.export{background:#ff9800}
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -44,8 +43,6 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 
 <button onclick="addStudent()">Add Student</button>
 
-<button class="export" onclick="exportData()">Export to Excel</button>
-
 <table>
 <thead>
 <tr>
@@ -65,13 +62,12 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 
 </div>
 
-<script>
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<script type="module">
 
-// Your web app's Firebase configuration
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
   authDomain: "student-fee-manager-98c51.firebaseapp.com",
@@ -81,9 +77,105 @@ const firebaseConfig = {
   appId: "1:463103595080:web:3f0e964edd906fb1d23e7d"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
+let students=[];
+
+async function loadStudents(){
+
+students=[];
+
+const querySnapshot = await getDocs(collection(db,"students"));
+
+querySnapshot.forEach((doc)=>{
+students.push(doc.data());
+});
+
+render();
+
+}
+
+async function addStudent(){
+
+let student={
+name:document.getElementById("name").value,
+phone:document.getElementById("phone").value,
+course:document.getElementById("course").value,
+fee:document.getElementById("fee").value,
+due:document.getElementById("due").value,
+paid:false
+};
+
+await addDoc(collection(db,"students"),student);
+
+document.querySelectorAll("input").forEach(i=>i.value="");
+
+loadStudents();
+
+}
+
+function render(){
+
+let tbody=document.getElementById("table");
+tbody.innerHTML="";
+
+let collected=0;
+let pending=0;
+let overdueCount=0;
+
+students.forEach((s,i)=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+let late=0;
+let status="Pending";
+
+if(!s.paid && today>due){
+let diff=Math.floor((today-due)/(1000*60*60*24));
+late=diff*10;
+status="Overdue";
+overdueCount++;
+}
+
+if(s.paid) status="Paid";
+
+let total=parseInt(s.fee)+late;
+
+if(s.paid) collected+=total;
+else pending+=total;
+
+let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+
+let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
+
+let row=`
+<tr>
+<td>${s.name}</td>
+<td>${s.phone}</td>
+<td>${s.course}</td>
+<td>₹${s.fee}</td>
+<td>₹${late}</td>
+<td>₹${total}</td>
+<td>${status}</td>
+<td></td>
+<td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
+</tr>
+`;
+
+tbody.innerHTML+=row;
+
+});
+
+document.getElementById("students").innerText="Students: "+students.length;
+document.getElementById("collected").innerText="Collected: ₹"+collected;
+document.getElementById("pending").innerText="Pending: ₹"+pending;
+document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+
+}
+
+loadStudents();
 
 </script>
 
