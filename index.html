@@ -6,7 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWA support -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2d89ef">
 
@@ -43,8 +42,6 @@ button:hover{
 background:#1b5fbf
 }
 
-/* RED REMINDER BUTTON */
-
 .reminder-btn{
 background:#e53935;
 color:white
@@ -52,24 +49,6 @@ color:white
 
 .reminder-btn:hover{
 background:#c62828
-}
-
-/* MOBILE TABLE FIX */
-
-.table-wrapper{
-overflow-x:auto;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px
-}
-
-th,td{
-padding:8px;
-border-bottom:1px solid #ddd;
-text-align:left
 }
 
 .dashboard{
@@ -88,6 +67,18 @@ border-radius:8px;
 min-width:180px
 }
 
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px
+}
+
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd;
+text-align:left
+}
+
 .whatsapp{
 background:#25D366;
 color:white;
@@ -96,16 +87,46 @@ border-radius:5px;
 text-decoration:none
 }
 
-/* smaller mobile font */
+/* MOBILE CARD LAYOUT */
 
-@media (max-width:600px){
-
-table{
-font-size:12px
+.mobile-card{
+background:#f8f8f8;
+border-radius:10px;
+padding:12px;
+margin-bottom:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1)
 }
 
-th,td{
-padding:4px
+.mobile-card h3{
+margin:0 0 5px 0
+}
+
+.mobile-actions{
+margin-top:8px;
+display:flex;
+gap:10px
+}
+
+.mobile-actions button{
+width:auto
+}
+
+/* hide cards on desktop */
+
+.mobile-list{
+display:none
+}
+
+/* MOBILE VIEW */
+
+@media (max-width:700px){
+
+table{
+display:none
+}
+
+.mobile-list{
+display:block
 }
 
 }
@@ -141,10 +162,7 @@ Send reminders (0 overdue)
 <button onclick="addStudent()">Add Student</button>
 <button onclick="downloadReport()">Download Fee Report</button>
 
-<div class="table-wrapper">
-
 <table>
-
 <thead>
 <tr>
 <th>Name</th>
@@ -160,10 +178,9 @@ Send reminders (0 overdue)
 </thead>
 
 <tbody id="table"></tbody>
-
 </table>
 
-</div>
+<div id="mobileList" class="mobile-list"></div>
 
 </div>
 
@@ -292,7 +309,10 @@ a.click();
 function render(){
 
 let tbody=document.getElementById("table");
+let mobileList=document.getElementById("mobileList");
+
 tbody.innerHTML="";
+mobileList.innerHTML="";
 
 let collected=0;
 let pending=0;
@@ -323,8 +343,9 @@ if(s.paid) collected+=total;
 else pending+=total;
 
 let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
-
 let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
+
+/* TABLE */
 
 let row=`
 <tr>
@@ -341,6 +362,32 @@ let row=`
 `;
 
 tbody.innerHTML+=row;
+
+/* MOBILE CARD */
+
+let card=`
+<div class="mobile-card">
+
+<h3>${s.name}</h3>
+
+Course: ${s.course}<br>
+Fee: ₹${s.fee}<br>
+Late Fee: ₹${late}<br>
+Total: ₹${total}<br>
+Status: ${status}
+
+<div class="mobile-actions">
+
+<button onclick="markPaid('${s.id}')">Mark Paid</button>
+
+<a class="whatsapp" target="_blank" href="${link}">Send</a>
+
+</div>
+
+</div>
+`;
+
+mobileList.innerHTML+=card;
 
 });
 
