@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Fee Manager Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
+h1{margin-top:0}
+.container{max-width:1000px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15)}
+input,button{padding:10px;margin:5px 0;width:100%;border-radius:6px;border:1px solid #ccc}
+button{background:#2d89ef;color:white;border:none;cursor:pointer}
+button:hover{background:#1b5fbf}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
+.dashboard{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.card{flex:1;background:#2d89ef;color:white;padding:15px;border-radius:8px;min-width:180px}
+.whatsapp{background:#25D366;color:white;padding:5px 10px;border-radius:5px;text-decoration:none}
+.paid{background:#4CAF50}
+.export{background:#ff9800}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Student Fee Manager</h1>
+
+<div class="dashboard">
+<div class="card" id="students">Students: 0</div>
+<div class="card" id="collected">Collected: ₹0</div>
+<div class="card" id="pending">Pending: ₹0</div>
+<div class="card" id="overdue">Overdue: 0</div>
+</div>
+
+<h3>Add Student</h3>
+
+<input id="name" placeholder="Student Name">
+<input id="phone" placeholder="Parent Phone (e.g. 919876543210)">
+<input id="course" placeholder="Course">
+<input id="fee" type="number" placeholder="Fee Amount">
+<input id="due" type="date">
+
+<button onclick="addStudent()">Add Student</button>
+
+<button class="export" onclick="exportData()">Export to Excel</button>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Course</th>
+<th>Fee</th>
+<th>Late Fee</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+<th>Reminder</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+
+</div>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students")||"[]");
+
+function save(){
+localStorage.setItem("students",JSON.stringify(students));
+}
+
+function dashboard(){
+
+let totalStudents=students.length;
+let collected=0;
+let pending=0;
+let overdueCount=0;
+
+students.forEach(s=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+let late=0;
+if(!s.paid && today>due){
+let diff=Math.floor((today-due)/(1000*60*60*24));
+late=diff*10;
+overdueCount++;
+}
+
+let total=parseInt(s.fee)+late;
+
+if(s.paid) collected+=total;
+else pending+=total;
+
+});
+
+document.getElementById("students").innerText="Students: "+totalStudents;
+document.getElementById("collected").innerText="Collected: ₹"+collected;
+document.getElementById("pending").innerText="Pending: ₹"+pending;
+document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+
+}
+
+function render(){
+
+let tbody=document.getElementById("table");
+tbody.innerHTML="";
+
+students.forEach((s,i)=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+let late=0;
+let status="Pending";
+
+if(!s.paid && today>due){
+let diff=Math.floor((today-due)/(1000*60*60*24));
+late=diff*10;
+status="Overdue";
+}
+
+if(s.paid) status="Paid";
+
+let total=parseInt(s.fee)+late;
+
+let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
+
+let row=`
+<tr>
+<td>${s.name}</td>
+<td>${s.phone}</td>
+<td>${s.course}</td>
+<td>₹${s.fee}</td>
+<td>₹${late}</td>
+<td>₹${total}</td>
+<td>${status}</td>
+<td><button class="paid" onclick="markPaid(${i})">Mark Paid</button></td>
+<td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
+</tr>
+`;
+
+tbody.innerHTML+=row;
+
+});
+
+dashboard();
+save();
+
+}
+
+function addStudent(){
+
+let student={
+name:document.getElementById("name").value,
+phone:document.getElementById("phone").value,
+course:document.getElementById("course").value,
+fee:document.getElementById("fee").value,
+due:document.getElementById("due").value,
+paid:false
+};
+
+students.push(student);
+
+document.querySelectorAll("input").forEach(i=>i.value="");
+
+render();
+
+}
+
+function markPaid(i){
+students[i].paid=true;
+render();
+}
+
+function exportData(){
+
+let csv="Name,Phone,Course,Fee,Due Date,Paid\n";
+
+students.forEach(s=>{
+csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid}\n`;
+});
+
+let blob=new Blob([csv],{type:"text/csv"});
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download="student_fees.csv";
+a.click();
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
