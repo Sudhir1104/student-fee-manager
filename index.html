@@ -11,7 +11,25 @@
 <style>
 
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
-h1{margin-top:0}
+
+/* HEADER */
+
+.header{
+text-align:center;
+margin-bottom:20px
+}
+
+.header img{
+height:80px;
+display:block;
+margin:auto
+}
+
+h1{
+margin-top:10px
+}
+
+/* MAIN CONTAINER */
 
 .container{
 max-width:1000px;
@@ -41,7 +59,7 @@ button:hover{
 background:#1b5fbf
 }
 
-/* reminder button */
+/* REMINDER BUTTON */
 
 .reminder-btn{
 background:#e53935;
@@ -52,23 +70,23 @@ color:white
 background:#c62828
 }
 
-/* overdue */
+/* OVERDUE STYLE */
 
 .overdue{
 color:#e53935;
-font-weight:bold;
+font-weight:bold
 }
 
-/* disabled button */
+/* DISABLED BUTTON */
 
 .disabled-btn{
 background:#cccccc;
 color:#666;
 padding:6px 10px;
-border-radius:5px;
+border-radius:5px
 }
 
-/* dashboard */
+/* DASHBOARD */
 
 .dashboard{
 display:flex;
@@ -86,6 +104,8 @@ border-radius:8px;
 min-width:180px
 }
 
+/* TABLE */
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -98,6 +118,8 @@ border-bottom:1px solid #ddd;
 text-align:left
 }
 
+/* WHATSAPP BUTTON */
+
 .whatsapp{
 background:#25D366;
 color:white;
@@ -106,7 +128,7 @@ border-radius:5px;
 text-decoration:none
 }
 
-/* mobile cards */
+/* MOBILE CARDS */
 
 .mobile-card{
 background:#f8f8f8;
@@ -153,7 +175,10 @@ display:block
 
 <div class="container">
 
+<div class="header">
+<img src="logo.png">
 <h1>Student Fee Manager</h1>
+</div>
 
 <div class="dashboard">
 <div class="card" id="students">Students: 0</div>
@@ -359,8 +384,6 @@ let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total 
 
 let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
 
-/* TABLE */
-
 let reminderCell = s.paid
 ? '<span class="disabled-btn">Paid</span>'
 : `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
@@ -380,36 +403,6 @@ let row=`
 `;
 
 tbody.innerHTML+=row;
-
-/* MOBILE CARD */
-
-let mobileReminder = s.paid
-? '<span class="disabled-btn">Paid</span>'
-: `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
-
-let card=`
-<div class="mobile-card">
-
-<h3>${s.name}</h3>
-
-Course: ${s.course}<br>
-Fee: ₹${s.fee}<br>
-Late Fee: ₹${late}<br>
-Total: ₹${total}<br>
-Status: <span class="${status==='Overdue'?'overdue':''}">${status}</span>
-
-<div class="mobile-actions">
-
-<button onclick="markPaid('${s.id}')">Mark Paid</button>
-
-${mobileReminder}
-
-</div>
-
-</div>
-`;
-
-mobileList.innerHTML+=card;
 
 });
 
