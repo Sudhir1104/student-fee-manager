@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Student Fee Manager</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
@@ -42,6 +41,8 @@ button:hover{
 background:#1b5fbf
 }
 
+/* Reminder button */
+
 .reminder-btn{
 background:#e53935;
 color:white
@@ -49,6 +50,13 @@ color:white
 
 .reminder-btn:hover{
 background:#c62828
+}
+
+/* Overdue status */
+
+.overdue{
+color:#e53935;
+font-weight:bold;
 }
 
 .dashboard{
@@ -87,7 +95,7 @@ border-radius:5px;
 text-decoration:none
 }
 
-/* MOBILE CARD LAYOUT */
+/* Mobile card layout */
 
 .mobile-card{
 background:#f8f8f8;
@@ -111,13 +119,9 @@ gap:10px
 width:auto
 }
 
-/* hide cards on desktop */
-
 .mobile-list{
 display:none
 }
-
-/* MOBILE VIEW */
 
 @media (max-width:700px){
 
@@ -355,7 +359,7 @@ let row=`
 <td>₹${s.fee}</td>
 <td>₹${late}</td>
 <td>₹${total}</td>
-<td>${status}</td>
+<td class="${status==='Overdue'?'overdue':''}">${status}</td>
 <td><button onclick="markPaid('${s.id}')">Mark Paid</button></td>
 <td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
 </tr>
@@ -374,7 +378,7 @@ Course: ${s.course}<br>
 Fee: ₹${s.fee}<br>
 Late Fee: ₹${late}<br>
 Total: ₹${total}<br>
-Status: ${status}
+Status: <span class="${status==='Overdue'?'overdue':''}">${status}</span>
 
 <div class="mobile-actions">
 
