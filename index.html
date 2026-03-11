@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Student Fee Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
 h1{margin-top:0}
@@ -17,6 +18,7 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 .card{flex:1;background:#2d89ef;color:white;padding:15px;border-radius:8px;min-width:180px}
 .whatsapp{background:#25D366;color:white;padding:5px 10px;border-radius:5px;text-decoration:none}
 </style>
+
 </head>
 
 <body>
@@ -43,8 +45,10 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 <input id="due" type="date">
 
 <button onclick="addStudent()">Add Student</button>
+<button onclick="downloadReport()">Download Fee Report</button>
 
 <table>
+
 <thead>
 <tr>
 <th>Name</th>
@@ -54,10 +58,13 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 <th>Late Fee</th>
 <th>Total</th>
 <th>Status</th>
+<th>Action</th>
 <th>Reminder</th>
 </tr>
 </thead>
+
 <tbody id="table"></tbody>
+
 </table>
 
 </div>
@@ -65,7 +72,7 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs }
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -88,8 +95,12 @@ students=[];
 
 const querySnapshot = await getDocs(collection(db,"students"));
 
-querySnapshot.forEach((doc)=>{
-students.push(doc.data());
+querySnapshot.forEach((docSnap)=>{
+
+let data = docSnap.data();
+data.id = docSnap.id;
+students.push(data);
+
 });
 
 render();
@@ -126,6 +137,15 @@ loadStudents();
 
 }
 
+async function markPaid(id){
+
+const ref = doc(db,"students",id);
+await updateDoc(ref,{paid:true});
+
+loadStudents();
+
+}
+
 function sendReminders(){
 
 students.forEach((s)=>{
@@ -151,6 +171,28 @@ window.open(link,'_blank');
 
 }
 
+function downloadReport(){
+
+let csv="Name,Phone,Course,Fee,Due Date,Status\n";
+
+students.forEach((s)=>{
+
+let status=s.paid ? "Paid" : "Pending";
+
+csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${status}\n`;
+
+});
+
+let blob=new Blob([csv],{type:"text/csv"});
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download="student_fee_report.csv";
+a.click();
+
+}
+
 function render(){
 
 let tbody=document.getElementById("table");
@@ -169,10 +211,12 @@ let late=0;
 let status="Pending";
 
 if(!s.paid && today>due){
+
 let diff=Math.floor((today-due)/(1000*60*60*24));
 late=diff*10;
 status="Overdue";
 overdueCount++;
+
 }
 
 if(s.paid) status="Paid";
@@ -195,6 +239,7 @@ let row=`
 <td>₹${late}</td>
 <td>₹${total}</td>
 <td>${status}</td>
+<td><button onclick="markPaid('${s.id}')">Mark Paid</button></td>
 <td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
 </tr>
 `;
@@ -212,6 +257,8 @@ document.getElementById("overdue").innerText="Overdue: "+overdueCount;
 
 window.addStudent = addStudent;
 window.sendReminders = sendReminders;
+window.markPaid = markPaid;
+window.downloadReport = downloadReport;
 
 loadStudents();
 
