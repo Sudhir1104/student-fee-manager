@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Srishti Student Manager</title>
+<title>Student Fee Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
@@ -41,7 +41,7 @@ button:hover{
 background:#1b5fbf
 }
 
-/* Reminder button */
+/* reminder button */
 
 .reminder-btn{
 background:#e53935;
@@ -52,12 +52,23 @@ color:white
 background:#c62828
 }
 
-/* Overdue status */
+/* overdue */
 
 .overdue{
 color:#e53935;
 font-weight:bold;
 }
+
+/* disabled button */
+
+.disabled-btn{
+background:#cccccc;
+color:#666;
+padding:6px 10px;
+border-radius:5px;
+}
+
+/* dashboard */
 
 .dashboard{
 display:flex;
@@ -95,7 +106,7 @@ border-radius:5px;
 text-decoration:none
 }
 
-/* Mobile card layout */
+/* mobile cards */
 
 .mobile-card{
 background:#f8f8f8;
@@ -142,7 +153,7 @@ display:block
 
 <div class="container">
 
-<h1>Srishti Student Manager</h1>
+<h1>Student Fee Manager</h1>
 
 <div class="dashboard">
 <div class="card" id="students">Students: 0</div>
@@ -331,12 +342,10 @@ let late=0;
 let status="Pending";
 
 if(!s.paid && today>due){
-
 let diff=Math.floor((today-due)/(1000*60*60*24));
 late=diff*10;
 status="Overdue";
 overdueCount++;
-
 }
 
 if(s.paid) status="Paid";
@@ -347,9 +356,14 @@ if(s.paid) collected+=total;
 else pending+=total;
 
 let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+
 let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
 
 /* TABLE */
+
+let reminderCell = s.paid
+? '<span class="disabled-btn">Paid</span>'
+: `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
 
 let row=`
 <tr>
@@ -361,13 +375,17 @@ let row=`
 <td>₹${total}</td>
 <td class="${status==='Overdue'?'overdue':''}">${status}</td>
 <td><button onclick="markPaid('${s.id}')">Mark Paid</button></td>
-<td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
+<td>${reminderCell}</td>
 </tr>
 `;
 
 tbody.innerHTML+=row;
 
 /* MOBILE CARD */
+
+let mobileReminder = s.paid
+? '<span class="disabled-btn">Paid</span>'
+: `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
 
 let card=`
 <div class="mobile-card">
@@ -384,7 +402,7 @@ Status: <span class="${status==='Overdue'?'overdue':''}">${status}</span>
 
 <button onclick="markPaid('${s.id}')">Mark Paid</button>
 
-<a class="whatsapp" target="_blank" href="${link}">Send</a>
+${mobileReminder}
 
 </div>
 
