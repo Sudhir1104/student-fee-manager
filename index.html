@@ -66,138 +66,24 @@ th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left}
 </div>
 
 <script>
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-let students = JSON.parse(localStorage.getItem("students")||"[]");
-
-function save(){
-localStorage.setItem("students",JSON.stringify(students));
-}
-
-function dashboard(){
-
-let totalStudents=students.length;
-let collected=0;
-let pending=0;
-let overdueCount=0;
-
-students.forEach(s=>{
-
-let today=new Date();
-let due=new Date(s.due);
-
-let late=0;
-if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
-overdueCount++;
-}
-
-let total=parseInt(s.fee)+late;
-
-if(s.paid) collected+=total;
-else pending+=total;
-
-});
-
-document.getElementById("students").innerText="Students: "+totalStudents;
-document.getElementById("collected").innerText="Collected: ₹"+collected;
-document.getElementById("pending").innerText="Pending: ₹"+pending;
-document.getElementById("overdue").innerText="Overdue: "+overdueCount;
-
-}
-
-function render(){
-
-let tbody=document.getElementById("table");
-tbody.innerHTML="";
-
-students.forEach((s,i)=>{
-
-let today=new Date();
-let due=new Date(s.due);
-
-let late=0;
-let status="Pending";
-
-if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
-status="Overdue";
-}
-
-if(s.paid) status="Paid";
-
-let total=parseInt(s.fee)+late;
-
-let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
-let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
-
-let row=`
-<tr>
-<td>${s.name}</td>
-<td>${s.phone}</td>
-<td>${s.course}</td>
-<td>₹${s.fee}</td>
-<td>₹${late}</td>
-<td>₹${total}</td>
-<td>${status}</td>
-<td><button class="paid" onclick="markPaid(${i})">Mark Paid</button></td>
-<td><a class="whatsapp" target="_blank" href="${link}">Send</a></td>
-</tr>
-`;
-
-tbody.innerHTML+=row;
-
-});
-
-dashboard();
-save();
-
-}
-
-function addStudent(){
-
-let student={
-name:document.getElementById("name").value,
-phone:document.getElementById("phone").value,
-course:document.getElementById("course").value,
-fee:document.getElementById("fee").value,
-due:document.getElementById("due").value,
-paid:false
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
+  authDomain: "student-fee-manager-98c51.firebaseapp.com",
+  projectId: "student-fee-manager-98c51",
+  storageBucket: "student-fee-manager-98c51.firebasestorage.app",
+  messagingSenderId: "463103595080",
+  appId: "1:463103595080:web:3f0e964edd906fb1d23e7d"
 };
 
-students.push(student);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-document.querySelectorAll("input").forEach(i=>i.value="");
-
-render();
-
-}
-
-function markPaid(i){
-students[i].paid=true;
-render();
-}
-
-function exportData(){
-
-let csv="Name,Phone,Course,Fee,Due Date,Paid\n";
-
-students.forEach(s=>{
-csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid}\n`;
-});
-
-let blob=new Blob([csv],{type:"text/csv"});
-let url=URL.createObjectURL(blob);
-
-let a=document.createElement("a");
-a.href=url;
-a.download="student_fees.csv";
-a.click();
-
-}
-
-render();
 
 </script>
 
