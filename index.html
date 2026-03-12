@@ -1,255 +1,658 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>classy edge · refined card</title>
-  <!-- system fonts with graceful fallbacks — timeless & smartphone‑friendly -->
-  <style>
-    /* reset & base — pure understatement */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<title>Srishti Centre Fee Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(145deg, #f6f3f0 0%, #e8e2da 100%);
-      /* woven texture – subtle linen feel */
-      background-image: 
-        radial-gradient(circle at 25% 30%, rgba(200, 180, 160, 0.03) 0%, transparent 28%),
-        repeating-linear-gradient(45deg, rgba(180, 160, 140, 0.02) 0px, rgba(180, 160, 140, 0.02) 2px, transparent 2px, transparent 8px);
-      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+<link rel="manifest" href="manifest.json">
 
-    /* main card — calm, airy, timeless proportions */
-    .card {
-      max-width: 400px;  /* perfect for mobile thumb zone */
-      width: 100%;
-      background: rgba(255, 251, 245, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      background: #fefcf7;  /* warm white base */
-      border-radius: 32px;
-      box-shadow: 
-        0 20px 35px -10px rgba(80, 60, 40, 0.2),
-        0 2px 8px rgba(0, 0, 0, 0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.7);
-      padding: 2rem 1.8rem;
-      border: 1px solid rgba(220, 200, 180, 0.5);
-      transition: all 0.2s ease;
-    }
+<style>
 
-    /* elegant serif hierarchy — smartphone legibility with class */
-    .pretitle {
-      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
-      font-weight: 400;
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #a28e7a;
-      margin-bottom: 0.5rem;
-      padding-left: 0.2rem;
-    }
+body{
+font-family:Arial;
+background:#eef2f7;
+margin:0;
+padding:20px;
+}
 
-    h1 {
-      font-family: 'Cormorant Garamond', 'Georgia', serif;
-      font-weight: 500;
-      font-size: 2.4rem;
-      line-height: 1.1;
-      color: #2e251e;
-      margin-bottom: 0.75rem;
-      border-left: 3px solid #c7ad92;
-      padding-left: 1rem;
-      font-style: normal;
-      letter-spacing: -0.01em;
-    }
+.header{
+background:#2d89ef;
+border-radius:10px;
+padding:15px 20px;
+margin-bottom:20px;
+color:white;
+}
 
-    .subhead {
-      font-family: 'Cormorant Garamond', 'Georgia', serif;
-      font-weight: 400;
-      font-size: 1.2rem;
-      font-style: italic;
-      color: #6b5a4b;
-      margin-bottom: 1.75rem;
-      padding-left: 1.3rem;
-      letter-spacing: 0.02em;
-    }
+.logo-row{
+display:flex;
+align-items:center;
+gap:15px;
+flex:1;
+}
 
-    .description {
-      font-family: 'Lora', 'Palatino', serif;
-      font-weight: 400;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #3f332b;
-      margin-bottom: 2rem;
-      padding: 0 0.2rem;
-      border-bottom: 1px dashed #dccfc4;
-      padding-bottom: 1.5rem;
-    }
+.header-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+}
 
-    /* refined detail grid */
-    .details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem 1.2rem;
-      margin-bottom: 2.2rem;
-      justify-content: space-between;
-    }
+.logout-btn{
+background:rgba(255,255,255,0.2);
+color:white;
+border:1px solid rgba(255,255,255,0.5);
+padding:8px 16px;
+border-radius:6px;
+cursor:pointer;
+font-size:13px;
+white-space:nowrap;
+width:auto;
+margin:0;
+}
 
-    .detail-item {
-      flex: 1 1 100px;
-    }
+.logout-btn:hover{
+background:rgba(255,255,255,0.35);
+}
 
-    .detail-label {
-      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
-      font-weight: 400;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #b7a187;
-      margin-bottom: 0.2rem;
-    }
+.user-info{
+font-size:12px;
+opacity:0.85;
+text-align:right;
+}
 
-    .detail-value {
-      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
-      font-size: 1.5rem;
-      font-weight: 500;
-      line-height: 1.2;
-      color: #2f2a24;
-      border-bottom: 1px dotted #d6cbbc;
-      padding-bottom: 0.2rem;
-    }
+/* Hide entire page until auth check completes */
+.page-hidden{
+display:none;
+}
 
-    /* signature quote — extra classy */
-    .quote {
-      font-family: 'Lora', 'Palatino', serif;
-      font-size: 0.95rem;
-      font-style: italic;
-      color: #6a5b4e;
-      background: rgba(220, 205, 185, 0.2);
-      padding: 1rem 1.2rem;
-      border-radius: 60px 16px 60px 16px;
-      margin-bottom: 1.8rem;
-      border: 1px solid #e6d9cd;
-      box-shadow: inset 0 1px 4px rgba(255, 250, 240, 0.8);
-      text-align: center;
-      letter-spacing: 0.01em;
-    }
+.logo-row img{
+height:70px;
+}
 
-    .quote i {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      font-size: 1.8rem;
-      color: #aa8f76;
-      vertical-align: middle;
-      margin-right: 0.2rem;
-    }
+.title-block h1{
+margin:0;
+font-size:22px;
+}
 
-    /* elegant button — barely there, yet soft */
-    .button {
-      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
-      font-weight: 400;
-      font-size: 0.9rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #5b4d3e;
-      background: transparent;
-      border: 1.5px solid #cfbca9;
-      padding: 0.9rem 1.8rem;
-      border-radius: 48px;
-      width: fit-content;
-      margin: 0 auto 0.5rem;
-      transition: all 0.25s;
-      backdrop-filter: blur(4px);
-      background: rgba(255, 250, 240, 0.3);
-      box-shadow: 0 4px 12px rgba(140, 110, 80, 0.05);
-      cursor: default;  /* just for style, not interactive demo */
-    }
+.title-block h2{
+margin:0;
+font-size:15px;
+opacity:0.9;
+}
 
-    .button:hover {
-      background: #e6d7c8;
-      color: #2f2a24;
-      border-color: #b2947a;
-    }
+.container{
+max-width:1000px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 12px rgba(0,0,0,0.15);
+}
 
-    /* fine print – discrete elegance */
-    .footnote {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 300;
-      font-size: 0.55rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #c6b3a1;
-      text-align: center;
-      margin-top: 1.5rem;
-    }
+input,button{
+padding:10px;
+margin:5px 0;
+width:100%;
+border-radius:6px;
+border:1px solid #ccc;
+}
 
-    /* smartphone font tuning */
-    @media (max-width: 420px) {
-      h1 {
-        font-size: 2rem;
-      }
-      .subhead {
-        font-size: 1rem;
-      }
-      .card {
-        padding: 1.8rem 1.2rem;
-      }
-      .detail-value {
-        font-size: 1.3rem;
-      }
-    }
+button{
+background:#2d89ef;
+color:white;
+border:none;
+cursor:pointer;
+}
 
-    /* import the real classy fonts – clean, fast, mobile friendly */
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital@0;1&family=Montserrat:wght@300;400;500&display=swap');
-    /* fallbacks: Georgia, Palatino, Helvetica — all superb on smartphones */
-  </style>
+button:hover{
+background:#1b5fbf;
+}
+
+.reminder-btn{
+background:#e53935;
+}
+
+.overdue{
+color:#e53935;
+font-weight:bold;
+}
+
+.disabled-btn{
+background:#ccc;
+color:#666;
+padding:6px 10px;
+border-radius:5px;
+}
+
+.dashboard{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+
+.card{
+flex:1;
+background:#2d89ef;
+color:white;
+padding:15px;
+border-radius:8px;
+text-align:center;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd;
+}
+
+.mobile-card{
+background:#f8f8f8;
+border-radius:10px;
+padding:12px;
+margin-bottom:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mobile-list{
+display:none;
+}
+
+/* Search bar styles */
+.search-wrapper{
+position:relative;
+margin-bottom:15px;
+}
+
+.search-wrapper input{
+padding-left:38px;
+border:2px solid #2d89ef;
+font-size:15px;
+margin:0;
+}
+
+.search-wrapper input:focus{
+outline:none;
+border-color:#1b5fbf;
+box-shadow:0 0 0 3px rgba(45,137,239,0.15);
+}
+
+.search-icon{
+position:absolute;
+left:11px;
+top:50%;
+transform:translateY(-50%);
+color:#2d89ef;
+font-size:16px;
+pointer-events:none;
+}
+
+.no-results{
+text-align:center;
+color:#999;
+padding:20px;
+font-style:italic;
+}
+
+@media(max-width:700px){
+
+table{display:none}
+.mobile-list{display:block}
+
+.logo-row{
+flex-direction:column;
+text-align:center;
+}
+
+}
+
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:13px;
+color:#666;
+}
+
+</style>
 </head>
+
 <body>
-  <div class="card">
-    <!-- everything composed for a classy, serene reading on small screen -->
-    <div class="pretitle">maison · établi</div>
-    <h1>LUMIÈRE<br>NOIR</h1>
-    <div class="subhead">timeless edit — autumn 2025</div>
 
-    <div class="description">
-      A restrained palette of deep ink and warm parchment. Crafted for those who appreciate the quiet texture of well‑chosen letters and the poetry of space.
-    </div>
+<div class="container" style="display:none">
 
-    <!-- refined information grouping -->
-    <div class="details">
-      <div class="detail-item">
-        <div class="detail-label">design</div>
-        <div class="detail-value">S · R</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">edition</div>
-        <div class="detail-value">XII</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">paper</div>
-        <div class="detail-value">avril</div>
-      </div>
-    </div>
+<div class="header">
 
-    <!-- quote with an elegant opening mark -->
-    <div class="quote">
-      <i>“</i> Le détail n’est pas le petit, c’est le précis <i>”</i>
-    </div>
+<div class="header-row">
 
-    <!-- subtle action element — understated button -->
-    <div class="button">
-      découvrir l’archive
-    </div>
-    <div class="footnote">
-      ✻ composition typographique ✻
-    </div>
-  </div>
+<div class="logo-row">
+<img src="logo.png">
+<div class="title-block">
+<h1>Srishti Centre for Performing Arts</h1>
+<h2>Student Fee Manager</h2>
+</div>
+</div>
+
+<div style="text-align:right">
+<div class="user-info" id="userEmail"></div>
+<button class="logout-btn" onclick="logout()">Sign Out</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="dashboard">
+<div class="card" id="students">Students: 0</div>
+<div class="card" id="collected">Collected: ₹0</div>
+<div class="card" id="pending">Pending: ₹0</div>
+<div class="card" id="overdue">Overdue: 0</div>
+</div>
+
+<button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
+📩 Send Fine Notice to All Overdue Students
+</button>
+
+<!-- Search Bar -->
+<div class="search-wrapper">
+<span class="search-icon">🔍</span>
+<input id="searchInput" placeholder="Search student by name..." oninput="render()">
+</div>
+
+<input id="name" placeholder="Student Name">
+<input id="phone" placeholder="Parent Phone">
+<input id="course" placeholder="Course">
+<input id="fee" type="number" placeholder="Fee">
+<input id="due" type="date">
+
+<button onclick="addStudent()">Add Student</button>
+<button onclick="downloadReport()">Download Excel</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Course</th>
+<th>Fee</th>
+<th>Late</th>
+<th>Total</th>
+<th>Status</th>
+<th>Actions</th>
+<th>Reminder</th>
+<th>QR</th>
+<th>Receipt</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+<div id="mobileList" class="mobile-list"></div>
+
+<div class="footer">
+© Srishti Centre for Performing Arts
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
+authDomain:"student-fee-manager-98c51.firebaseapp.com",
+projectId:"student-fee-manager-98c51",
+storageBucket:"student-fee-manager-98c51.firebasestorage.app",
+messagingSenderId:"463103595080",
+appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const auth=getAuth(app);
+
+// Auth guard – redirect to login if not signed in
+onAuthStateChanged(auth,(user)=>{
+  if(!user){
+    window.location.href="login.html";
+  } else {
+    document.getElementById("userEmail").textContent=user.email;
+    document.querySelector(".container").style.display="block";
+    loadStudents();
+  }
+});
+
+async function logout(){
+  await signOut(auth);
+  window.location.href="login.html";
+}
+
+function cleanPhone(phone){
+phone=phone.replace(/\D/g,'');
+if(!phone.startsWith("91")) phone="91"+phone;
+return phone;
+}
+
+function sendReminder(phone,name,total){
+
+phone=cleanPhone(phone);
+
+let message=
+"Dear Parent,\n\n"+
+"This is a reminder that the fee for *"+name+"* is overdue.\n\n"+
+"Fee: ₹"+(total-100)+"\n"+
+"Late Fine: ₹100\n"+
+"Total Due: ₹"+total+"\n\n"+
+"Please make payment immediately to avoid further penalties.\n\n"+
+"Srishti Centre for Performing Arts";
+
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+
+window.open(url,'_blank');
+
+}
+
+function sendReceipt(phone,name,amount,receipt,date){
+
+phone=cleanPhone(phone);
+
+let message=
+"Srishti Centre for Performing Arts\n\n"+
+"RECEIPT\n\n"+
+"Receipt No: "+receipt+"\n"+
+"Student: "+name+"\n"+
+"Amount Paid: ₹"+amount+"\n"+
+"Date: "+date+"\n\n"+
+"Thank you for your payment.";
+
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+
+window.open(url,'_blank');
+
+}
+
+async function loadStudents(){
+
+students=[];
+
+const querySnapshot=await getDocs(collection(db,"students"));
+
+querySnapshot.forEach((docSnap)=>{
+let data=docSnap.data();
+data.id=docSnap.id;
+students.push(data);
+});
+
+render();
+
+}
+
+async function addStudent(){
+
+let student={
+name:document.getElementById("name").value,
+phone:cleanPhone(document.getElementById("phone").value),
+course:document.getElementById("course").value,
+fee:document.getElementById("fee").value,
+due:document.getElementById("due").value,
+paid:false
+};
+
+await addDoc(collection(db,"students"),student);
+
+document.querySelectorAll("input").forEach(i=>i.value="");
+
+loadStudents();
+
+}
+
+async function markPaid(id){
+
+let receipt="RCPT-"+Date.now();
+let date=new Date().toISOString().slice(0,10);
+
+await updateDoc(doc(db,"students",id),{
+paid:true,
+receiptNumber:receipt,
+paidDate:date
+});
+
+alert("Payment recorded. Receipt No: "+receipt);
+
+loadStudents();
+
+}
+
+async function deleteStudent(id){
+
+if(!confirm("Delete this student?")) return;
+
+await deleteDoc(doc(db,"students",id));
+
+loadStudents();
+
+}
+
+async function editStudent(id){
+
+let s=students.find(x=>x.id==id);
+
+let newPhone=prompt("Edit phone",s.phone);
+let newFee=prompt("Edit fee",s.fee);
+
+await updateDoc(doc(db,"students",id),{
+phone:cleanPhone(newPhone),
+fee:newFee
+});
+
+loadStudents();
+
+}
+
+function paymentQR(name,amount){
+
+let upi="61407789476@icici";
+
+let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
+
+let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+
+window.open(qr,'_blank');
+
+}
+
+function sendReminders(){
+
+let count=0;
+
+students.forEach((s)=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+if(!s.paid && today>due){
+let total=parseInt(s.fee)+100;
+sendReminder(s.phone,s.name,total);
+count++;
+}
+
+});
+
+if(count===0) alert("No overdue students found.");
+
+}
+
+function downloadReport(){
+
+let csv="Name,Phone,Course,Fee,Due,Status\n";
+
+students.forEach(s=>{
+csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid?"Paid":"Pending"}\n`;
+});
+
+let blob=new Blob([csv]);
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download="fees.csv";
+a.click();
+
+}
+
+function render(){
+
+let tbody=document.getElementById("table");
+let mobile=document.getElementById("mobileList");
+
+tbody.innerHTML="";
+mobile.innerHTML="";
+
+let overdueCount=0;
+let collected=0;
+let pending=0;
+
+// Get search query
+let query=document.getElementById("searchInput").value.trim().toLowerCase();
+
+// Filter students by name
+let filtered=query
+? students.filter(s=>s.name.toLowerCase().includes(query))
+: students;
+
+if(filtered.length===0 && query){
+tbody.innerHTML=`<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
+mobile.innerHTML=`<div class="no-results">No student found matching "${query}"</div>`;
+}
+
+// Dashboard counts use ALL students (not filtered)
+students.forEach(s=>{
+
+let today=new Date();
+let due=new Date(s.due);
+let late=0;
+
+if(!s.paid && today>due){
+late=100;
+overdueCount++;
+}
+
+let total=parseInt(s.fee)+late;
+
+if(s.paid)collected+=total;
+else pending+=total;
+
+});
+
+// Render only filtered students in table/mobile
+filtered.forEach(s=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+let late=0;
+let status="Pending";
+
+if(!s.paid && today>due){
+late=100;
+status="Overdue";
+}
+
+if(s.paid)status="Paid";
+
+let total=parseInt(s.fee)+late;
+
+let reminder=s.paid
+?'<span class="disabled-btn">Paid</span>'
+:`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
+
+let receipt=s.paid
+?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
+:"";
+
+tbody.innerHTML+=`
+<tr>
+<td>${s.name}</td>
+<td>${s.phone}</td>
+<td>${s.course}</td>
+<td>₹${s.fee}</td>
+<td>₹${late}</td>
+<td>₹${total}</td>
+<td class="${status=='Overdue'?'overdue':''}">${status}</td>
+<td>
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="deleteStudent('${s.id}')">Delete</button>
+</td>
+<td>${reminder}</td>
+<td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
+<td>${receipt}</td>
+</tr>
+`;
+
+mobile.innerHTML+=`
+<div class="mobile-card">
+
+<h3>${s.name}</h3>
+
+Course: ${s.course}<br>
+Fee: ₹${total}<br>
+Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
+
+<br><br>
+
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="deleteStudent('${s.id}')">Delete</button>
+
+<br><br>
+
+${reminder}
+
+<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
+
+${receipt}
+
+</div>
+`;
+
+});
+
+document.getElementById("students").innerText="Students: "+students.length;
+document.getElementById("collected").innerText="Collected: ₹"+collected;
+document.getElementById("pending").innerText="Pending: ₹"+pending;
+document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+
+}
+
+window.addStudent=addStudent;
+window.markPaid=markPaid;
+window.deleteStudent=deleteStudent;
+window.editStudent=editStudent;
+window.paymentQR=paymentQR;
+window.sendReminder=sendReminder;
+window.sendReminders=sendReminders;
+window.sendReceipt=sendReceipt;
+window.downloadReport=downloadReport;
+window.render=render;
+window.logout=logout;
+
+let students=[];
+
+</script>
+
 </body>
 </html>
