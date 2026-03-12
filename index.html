@@ -12,7 +12,7 @@
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
 
 .header{text-align:center;margin-bottom:20px}
-.header img{height:80px;margin:auto;display:block}
+.header img{height:80px;display:block;margin:auto}
 
 .container{
 max-width:1000px;
@@ -72,7 +72,10 @@ border-collapse:collapse;
 margin-top:20px
 }
 
-th,td{padding:8px;border-bottom:1px solid #ddd}
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd
+}
 
 .whatsapp{
 background:#25D366;
@@ -141,7 +144,7 @@ Send reminders (0 overdue)
 <th>Late</th>
 <th>Total</th>
 <th>Status</th>
-<th>Action</th>
+<th>Actions</th>
 <th>Reminder</th>
 <th>QR</th>
 </tr>
@@ -174,33 +177,27 @@ const db=getFirestore(app);
 
 let students=[];
 
-/* CLEAN PHONE */
-
 function cleanPhone(phone){
 
-phone = phone.replace(/\D/g,'');
+phone=phone.replace(/\D/g,'');
 
 if(!phone.startsWith("91")){
-phone = "91"+phone;
+phone="91"+phone;
 }
 
 return phone;
 
 }
 
-/* WHATSAPP LINK */
-
 function reminderLink(phone,name,total){
 
-phone = cleanPhone(phone);
+phone=cleanPhone(phone);
 
-let message = "Hello, fee for "+name+" is ₹"+total+". Please make payment.";
+let message="Hello, fee for "+name+" is ₹"+total+". Please make payment.";
 
 return "https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 
 }
-
-/* LOAD */
 
 async function loadStudents(){
 
@@ -219,8 +216,6 @@ students.push(data);
 render();
 
 }
-
-/* ADD */
 
 async function addStudent(){
 
@@ -241,44 +236,32 @@ loadStudents();
 
 }
 
-/* MARK PAID */
-
 async function markPaid(id){
 
-const ref=doc(db,"students",id);
-
-await updateDoc(ref,{paid:true});
+await updateDoc(doc(db,"students",id),{paid:true});
 
 loadStudents();
 
 }
-
-/* DELETE */
 
 async function deleteStudent(id){
 
-if(!confirm("Delete this student record?")) return;
+if(!confirm("Delete this student?")) return;
 
-const ref=doc(db,"students",id);
-
-await deleteDoc(ref);
+await deleteDoc(doc(db,"students",id));
 
 loadStudents();
 
 }
-
-/* EDIT */
 
 async function editStudent(id){
 
 let s=students.find(x=>x.id==id);
 
-let newPhone=prompt("Edit Phone",s.phone);
-let newFee=prompt("Edit Fee",s.fee);
+let newPhone=prompt("Edit phone",s.phone);
+let newFee=prompt("Edit fee",s.fee);
 
-const ref=doc(db,"students",id);
-
-await updateDoc(ref,{
+await updateDoc(doc(db,"students",id),{
 phone:cleanPhone(newPhone),
 fee:newFee
 });
@@ -286,8 +269,6 @@ fee:newFee
 loadStudents();
 
 }
-
-/* QR PAYMENT */
 
 function paymentQR(name,amount){
 
@@ -297,11 +278,9 @@ let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
 
 let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
 
-window.open(qr);
+window.open(qr,'_blank');
 
 }
-
-/* REMINDER */
 
 function sendReminders(){
 
@@ -312,15 +291,13 @@ let due=new Date(s.due);
 
 if(!s.paid && today>due){
 
-window.open(reminderLink(s.phone,s.name,s.fee));
+window.open(reminderLink(s.phone,s.name,s.fee),'_blank');
 
 }
 
 });
 
 }
-
-/* EXPORT */
 
 function downloadReport(){
 
@@ -341,8 +318,6 @@ a.download="fees.csv";
 a.click();
 
 }
-
-/* RENDER */
 
 function render(){
 
@@ -430,10 +405,10 @@ ${reminder}
 
 });
 
-studentsDiv.innerText="Students: "+students.length;
-collectedDiv.innerText="Collected: ₹"+collected;
-pendingDiv.innerText="Pending: ₹"+pending;
-overdueDiv.innerText="Overdue: "+overdueCount;
+document.getElementById("students").innerText="Students: "+students.length;
+document.getElementById("collected").innerText="Collected: ₹"+collected;
+document.getElementById("pending").innerText="Pending: ₹"+pending;
+document.getElementById("overdue").innerText="Overdue: "+overdueCount;
 
 document.getElementById("reminderButton").innerText=
 "Send reminders ("+overdueCount+" overdue)";
