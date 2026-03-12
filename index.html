@@ -11,8 +11,20 @@
 
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
 
-.header{text-align:center;margin-bottom:20px}
-.header img{height:80px;margin:auto;display:block}
+/* HEADER */
+
+.header{
+text-align:center;
+margin-bottom:20px
+}
+
+.header img{
+height:80px;
+display:block;
+margin:auto
+}
+
+/* CONTAINER */
 
 .container{
 max-width:1000px;
@@ -38,7 +50,13 @@ border:none;
 cursor:pointer
 }
 
-.reminder-btn{background:#e53935}
+button:hover{
+background:#1b5fbf
+}
+
+.reminder-btn{
+background:#e53935
+}
 
 .overdue{
 color:#e53935;
@@ -46,7 +64,7 @@ font-weight:bold
 }
 
 .disabled-btn{
-background:#cccccc;
+background:#ccc;
 color:#666;
 padding:6px 10px;
 border-radius:5px
@@ -67,6 +85,8 @@ padding:15px;
 border-radius:8px
 }
 
+/* TABLE */
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -78,6 +98,8 @@ padding:8px;
 border-bottom:1px solid #ddd
 }
 
+/* WHATSAPP */
+
 .whatsapp{
 background:#25D366;
 padding:5px 10px;
@@ -85,6 +107,8 @@ border-radius:5px;
 color:white;
 text-decoration:none
 }
+
+/* MOBILE CARD */
 
 .mobile-card{
 background:#f8f8f8;
@@ -164,7 +188,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
+const firebaseConfig={
 apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
 authDomain:"student-fee-manager-98c51.firebaseapp.com",
 projectId:"student-fee-manager-98c51",
@@ -225,8 +249,6 @@ loadStudents();
 
 }
 
-/* EDIT STUDENT */
-
 async function editStudent(id){
 
 let s=students.find(x=>x.id==id);
@@ -259,6 +281,16 @@ window.open(qr);
 
 }
 
+/* REMINDER */
+
+function reminderLink(phone,name,total){
+
+return `https://wa.me/${phone}?text=${encodeURIComponent(
+"Hello, fee for "+name+" is ₹"+total+". Please make payment."
+)}`;
+
+}
+
 function sendReminders(){
 
 students.forEach((s)=>{
@@ -268,17 +300,15 @@ let due=new Date(s.due);
 
 if(!s.paid && today>due){
 
-let msg=`Hello fee for ${s.name} ₹${s.fee}`;
-
-let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
-
-window.open(link);
+window.open(reminderLink(s.phone,s.name,s.fee));
 
 }
 
 });
 
 }
+
+/* EXPORT */
 
 function downloadReport(){
 
@@ -337,11 +367,9 @@ let total=parseInt(s.fee)+late;
 if(s.paid)collected+=total;
 else pending+=total;
 
-let link=`https://wa.me/${s.phone}`;
-
 let reminder=s.paid
 ?'<span class="disabled-btn">Paid</span>'
-:`<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
+:`<a class="whatsapp" target="_blank" href="${reminderLink(s.phone,s.name,total)}">Reminder</a>`;
 
 let row=`
 <tr>
@@ -357,7 +385,7 @@ let row=`
 <button onclick="markPaid('${s.id}')">Paid</button>
 </td>
 <td>${reminder}</td>
-<td><button onclick="paymentQR('${s.name}',${total})">QR</button></td>
+<td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
 </tr>
 `;
 
@@ -377,7 +405,11 @@ Status <span class="${status=='Overdue'?'overdue':''}">${status}</span>
 
 <button onclick="editStudent('${s.id}')">Edit</button>
 <button onclick="markPaid('${s.id}')">Paid</button>
-<button onclick="paymentQR('${s.name}',${total})">QR</button>
+
+<br><br>
+
+${reminder}
+<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
 
 </div>
 `;
