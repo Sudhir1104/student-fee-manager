@@ -35,28 +35,20 @@ gap:15px;
 
 .logo-row img{
 height:70px;
-width:auto;
-}
-
-.title-block{
-display:flex;
-flex-direction:column;
 }
 
 .title-block h1{
 margin:0;
 font-size:22px;
-font-weight:bold;
 }
 
 .title-block h2{
 margin:0;
 font-size:15px;
-font-weight:normal;
 opacity:0.9;
 }
 
-/* MAIN CONTAINER */
+/* CONTAINER */
 
 .container{
 max-width:1000px;
@@ -66,8 +58,6 @@ padding:20px;
 border-radius:10px;
 box-shadow:0 3px 12px rgba(0,0,0,0.15);
 }
-
-/* INPUTS */
 
 input,button{
 padding:10px;
@@ -91,8 +81,6 @@ background:#1b5fbf;
 .reminder-btn{
 background:#e53935;
 }
-
-/* STATUS */
 
 .overdue{
 color:#e53935;
@@ -226,6 +214,7 @@ Send reminders (0 overdue)
 <th>Actions</th>
 <th>Reminder</th>
 <th>QR</th>
+<th>Receipt</th>
 </tr>
 </thead>
 
@@ -279,11 +268,26 @@ let message=
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 
-if(navigator.share){
-navigator.share({text:message});
-}else{
 window.open(url,'_blank');
+
 }
+
+function sendReceipt(phone,name,amount,receipt,date){
+
+phone=cleanPhone(phone);
+
+let message=
+"Srishti Centre for Performing Arts\n\n"+
+"RECEIPT\n\n"+
+"Receipt No: "+receipt+"\n"+
+"Student: "+name+"\n"+
+"Amount Paid: ₹"+amount+"\n"+
+"Date: "+date+"\n\n"+
+"Thank you for your payment.";
+
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+
+window.open(url,'_blank');
 
 }
 
@@ -323,8 +327,18 @@ loadStudents();
 }
 
 async function markPaid(id){
-await updateDoc(doc(db,"students",id),{paid:true});
+
+let receipt="RCPT-"+Date.now();
+let date=new Date().toISOString().slice(0,10);
+
+await updateDoc(doc(db,"students",id),{
+paid:true,
+receiptNumber:receipt,
+paidDate:date
+});
+
 loadStudents();
+
 }
 
 async function deleteStudent(id){
@@ -432,9 +446,13 @@ let total=parseInt(s.fee)+late;
 if(s.paid)collected+=total;
 else pending+=total;
 
-let reminderButton=s.paid
+let reminder=s.paid
 ?'<span class="disabled-btn">Paid</span>'
 :`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
+
+let receipt=s.paid
+?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber}','${s.paidDate}')">Send Receipt</button>`
+:"";
 
 tbody.innerHTML+=`
 <tr>
@@ -450,24 +468,10 @@ tbody.innerHTML+=`
 <button onclick="markPaid('${s.id}')">Paid</button>
 <button onclick="deleteStudent('${s.id}')">Delete</button>
 </td>
-<td>${reminderButton}</td>
+<td>${reminder}</td>
 <td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
+<td>${receipt}</td>
 </tr>
-`;
-
-mobile.innerHTML+=`
-<div class="mobile-card">
-<h3>${s.name}</h3>
-Fee ₹${total}<br>
-Status <span class="${status=='Overdue'?'overdue':''}">${status}</span>
-<br><br>
-<button onclick="editStudent('${s.id}')">Edit</button>
-<button onclick="markPaid('${s.id}')">Paid</button>
-<button onclick="deleteStudent('${s.id}')">Delete</button>
-<br><br>
-${reminderButton}
-<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
-</div>
 `;
 
 });
@@ -488,6 +492,7 @@ window.editStudent=editStudent;
 window.paymentQR=paymentQR;
 window.sendReminder=sendReminder;
 window.sendReminders=sendReminders;
+window.sendReceipt=sendReceipt;
 window.downloadReport=downloadReport;
 
 loadStudents();
