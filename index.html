@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
 <title>Srishti Centre Fee Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="manifest.json">
 
 <style>
 
@@ -15,19 +16,42 @@ margin:0;
 padding:20px;
 }
 
-/* LOGIN */
-
-#loginPage{
-max-width:400px;
-margin:auto;
-background:white;
-padding:30px;
+.header{
+background:#2d89ef;
 border-radius:10px;
-box-shadow:0 3px 12px rgba(0,0,0,0.15);
+padding:15px 20px;
+margin-bottom:20px;
+color:white;
 }
 
-#appPage{
-display:none;
+.logo-row{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-row img{
+height:70px;
+}
+
+.title-block h1{
+margin:0;
+font-size:22px;
+}
+
+.title-block h2{
+margin:0;
+font-size:15px;
+opacity:0.9;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 12px rgba(0,0,0,0.15);
 }
 
 input,button{
@@ -45,12 +69,24 @@ border:none;
 cursor:pointer;
 }
 
-.header{
-background:#2d89ef;
-color:white;
-padding:15px;
-border-radius:10px;
-margin-bottom:20px;
+button:hover{
+background:#1b5fbf;
+}
+
+.reminder-btn{
+background:#e53935;
+}
+
+.overdue{
+color:#e53935;
+font-weight:bold;
+}
+
+.disabled-btn{
+background:#ccc;
+color:#666;
+padding:6px 10px;
+border-radius:5px;
 }
 
 .dashboard{
@@ -69,45 +105,80 @@ border-radius:8px;
 text-align:center;
 }
 
-</style>
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
 
+th,td{
+padding:8px;
+border-bottom:1px solid #ddd;
+}
+
+.mobile-card{
+background:#f8f8f8;
+border-radius:10px;
+padding:12px;
+margin-bottom:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mobile-list{
+display:none;
+}
+
+@media(max-width:700px){
+
+table{display:none}
+.mobile-list{display:block}
+
+.logo-row{
+flex-direction:column;
+text-align:center;
+}
+
+}
+
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:13px;
+color:#666;
+}
+
+</style>
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
-
-<div id="loginPage">
-
-<h2>Srishti Centre Login</h2>
-
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-</div>
-
-<!-- APP PAGE -->
-
-<div id="appPage">
+<div class="container">
 
 <div class="header">
 
-<h2>Srishti Centre for Performing Arts</h2>
+<div class="logo-row">
 
-<button onclick="logout()">Logout</button>
+<img src="logo.png">
+
+<div class="title-block">
+<h1>Srishti Centre for Performing Arts</h1>
+<h2>Student Fee Manager</h2>
+</div>
+
+</div>
 
 </div>
 
 <div class="dashboard">
-
 <div class="card" id="students">Students: 0</div>
 <div class="card" id="collected">Collected: ₹0</div>
 <div class="card" id="pending">Pending: ₹0</div>
 <div class="card" id="overdue">Overdue: 0</div>
-
 </div>
+
+<button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
+Send reminders
+</button>
 
 <input id="name" placeholder="Student Name">
 <input id="phone" placeholder="Parent Phone">
@@ -116,22 +187,43 @@ text-align:center;
 <input id="due" type="date">
 
 <button onclick="addStudent()">Add Student</button>
+<button onclick="downloadReport()">Download Excel</button>
 
-<table border="1" width="100%" id="table"></table>
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Course</th>
+<th>Fee</th>
+<th>Late</th>
+<th>Total</th>
+<th>Status</th>
+<th>Actions</th>
+<th>Reminder</th>
+<th>QR</th>
+<th>Receipt</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+<div id="mobileList" class="mobile-list"></div>
+
+<div class="footer">
+© Srishti Centre for Performing Arts
+</div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import { getFirestore,collection,addDoc,getDocs,updateDoc,doc }
-
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-import { getAuth,signInWithEmailAndPassword,signOut }
-
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig={
 apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
@@ -143,67 +235,50 @@ appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
 };
 
 const app=initializeApp(firebaseConfig);
-
 const db=getFirestore(app);
-
-const auth=getAuth(app);
 
 let students=[];
 
-/* LOGIN */
+function cleanPhone(phone){
+phone=phone.replace(/\D/g,'');
+if(!phone.startsWith("91")) phone="91"+phone;
+return phone;
+}
 
-window.login=async function(){
+function sendReminder(phone,name,total){
 
-let email=document.getElementById("email").value;
-let password=document.getElementById("password").value;
+phone=cleanPhone(phone);
 
-await signInWithEmailAndPassword(auth,email,password);
+let message=
+"Dear Parent,\n\n"+
+"Fee for "+name+" ₹"+total+" is overdue.\n"+
+"Please make payment immediately.\n\n"+
+"Srishti Centre for Performing Arts";
 
-document.getElementById("loginPage").style.display="none";
-document.getElementById("appPage").style.display="block";
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 
-loadStudents();
+window.open(url,'_blank');
 
 }
 
-/* LOGOUT */
+function sendReceipt(phone,name,amount,receipt,date){
 
-window.logout=function(){
+phone=cleanPhone(phone);
 
-signOut(auth);
+let message=
+"Srishti Centre for Performing Arts\n\n"+
+"RECEIPT\n\n"+
+"Receipt No: "+receipt+"\n"+
+"Student: "+name+"\n"+
+"Amount Paid: ₹"+amount+"\n"+
+"Date: "+date+"\n\n"+
+"Thank you for your payment.";
 
-document.getElementById("loginPage").style.display="block";
-document.getElementById("appPage").style.display="none";
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 
-}
-
-/* ADD STUDENT */
-
-window.addStudent=async function(){
-
-let student={
-
-name:document.getElementById("name").value,
-
-phone:document.getElementById("phone").value,
-
-course:document.getElementById("course").value,
-
-fee:document.getElementById("fee").value,
-
-due:document.getElementById("due").value,
-
-paid:false
-
-};
-
-await addDoc(collection(db,"students"),student);
-
-loadStudents();
+window.open(url,'_blank');
 
 }
-
-/* LOAD STUDENTS */
 
 async function loadStudents(){
 
@@ -212,51 +287,232 @@ students=[];
 const querySnapshot=await getDocs(collection(db,"students"));
 
 querySnapshot.forEach((docSnap)=>{
-
 let data=docSnap.data();
-
 data.id=docSnap.id;
-
 students.push(data);
-
 });
 
 render();
 
 }
 
-/* RENDER */
+async function addStudent(){
+
+let student={
+name:document.getElementById("name").value,
+phone:cleanPhone(document.getElementById("phone").value),
+course:document.getElementById("course").value,
+fee:document.getElementById("fee").value,
+due:document.getElementById("due").value,
+paid:false
+};
+
+await addDoc(collection(db,"students"),student);
+
+document.querySelectorAll("input").forEach(i=>i.value="");
+
+loadStudents();
+
+}
+
+async function markPaid(id){
+
+let receipt="RCPT-"+Date.now();
+let date=new Date().toISOString().slice(0,10);
+
+await updateDoc(doc(db,"students",id),{
+paid:true,
+receiptNumber:receipt,
+paidDate:date
+});
+
+alert("Payment recorded. Receipt No: "+receipt);
+
+loadStudents();
+
+}
+
+async function deleteStudent(id){
+
+if(!confirm("Delete this student?")) return;
+
+await deleteDoc(doc(db,"students",id));
+
+loadStudents();
+
+}
+
+async function editStudent(id){
+
+let s=students.find(x=>x.id==id);
+
+let newPhone=prompt("Edit phone",s.phone);
+let newFee=prompt("Edit fee",s.fee);
+
+await updateDoc(doc(db,"students",id),{
+phone:cleanPhone(newPhone),
+fee:newFee
+});
+
+loadStudents();
+
+}
+
+function paymentQR(name,amount){
+
+let upi="schoolfees@upi";
+
+let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
+
+let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+
+window.open(qr,'_blank');
+
+}
+
+function sendReminders(){
+
+students.forEach((s)=>{
+
+let today=new Date();
+let due=new Date(s.due);
+
+if(!s.paid && today>due){
+sendReminder(s.phone,s.name,s.fee);
+}
+
+});
+
+}
+
+function downloadReport(){
+
+let csv="Name,Phone,Course,Fee,Due,Status\n";
+
+students.forEach(s=>{
+csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid?"Paid":"Pending"}\n`;
+});
+
+let blob=new Blob([csv]);
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download="fees.csv";
+a.click();
+
+}
 
 function render(){
 
-let table=document.getElementById("table");
+let tbody=document.getElementById("table");
+let mobile=document.getElementById("mobileList");
 
-table.innerHTML="<tr><th>Name</th><th>Course</th><th>Fee</th></tr>";
+tbody.innerHTML="";
+mobile.innerHTML="";
+
+let overdueCount=0;
+let collected=0;
+let pending=0;
 
 students.forEach(s=>{
 
-table.innerHTML+=`
+let today=new Date();
+let due=new Date(s.due);
 
+let late=0;
+let status="Pending";
+
+if(!s.paid && today>due){
+let diff=Math.floor((today-due)/(1000*60*60*24));
+late=diff*10;
+status="Overdue";
+overdueCount++;
+}
+
+if(s.paid)status="Paid";
+
+let total=parseInt(s.fee)+late;
+
+if(s.paid)collected+=total;
+else pending+=total;
+
+let reminder=s.paid
+?'<span class="disabled-btn">Paid</span>'
+:`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
+
+let receipt=s.paid
+?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
+:"";
+
+tbody.innerHTML+=`
 <tr>
-
 <td>${s.name}</td>
-
+<td>${s.phone}</td>
 <td>${s.course}</td>
-
-<td>${s.fee}</td>
-
+<td>₹${s.fee}</td>
+<td>₹${late}</td>
+<td>₹${total}</td>
+<td class="${status=='Overdue'?'overdue':''}">${status}</td>
+<td>
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="deleteStudent('${s.id}')">Delete</button>
+</td>
+<td>${reminder}</td>
+<td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
+<td>${receipt}</td>
 </tr>
+`;
 
+mobile.innerHTML+=`
+<div class="mobile-card">
+
+<h3>${s.name}</h3>
+
+Course: ${s.course}<br>
+Fee: ₹${total}<br>
+Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
+
+<br><br>
+
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="deleteStudent('${s.id}')">Delete</button>
+
+<br><br>
+
+${reminder}
+
+<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
+
+${receipt}
+
+</div>
 `;
 
 });
 
 document.getElementById("students").innerText="Students: "+students.length;
+document.getElementById("collected").innerText="Collected: ₹"+collected;
+document.getElementById("pending").innerText="Pending: ₹"+pending;
+document.getElementById("overdue").innerText="Overdue: "+overdueCount;
 
 }
+
+window.addStudent=addStudent;
+window.markPaid=markPaid;
+window.deleteStudent=deleteStudent;
+window.editStudent=editStudent;
+window.paymentQR=paymentQR;
+window.sendReminder=sendReminder;
+window.sendReminders=sendReminders;
+window.sendReceipt=sendReceipt;
+window.downloadReport=downloadReport;
+
+loadStudents();
 
 </script>
 
 </body>
-
 </html>
