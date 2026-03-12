@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Srishti Centre Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:Arial;
+background:#eef2f7;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.login-box{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 3px 12px rgba(0,0,0,0.2);
+width:300px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#2d89ef;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#1b5fbf;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="login-box">
+
+<h2>Srishti Centre</h2>
+
+<input id="email" placeholder="Email">
+
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import { getAuth, signInWithEmailAndPassword }
+
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+
+apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
+
+authDomain:"student-fee-manager-98c51.firebaseapp.com",
+
+projectId:"student-fee-manager-98c51",
+
+storageBucket:"student-fee-manager-98c51.firebasestorage.app",
+
+messagingSenderId:"463103595080",
+
+appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+window.login = async function(){
+
+let email = document.getElementById("email").value;
+
+let password = document.getElementById("password").value;
+
+try{
+
+await signInWithEmailAndPassword(auth,email,password);
+
+window.location.href="index.html";
+
+}
+
+catch(err){
+
+alert("Login failed");
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>
