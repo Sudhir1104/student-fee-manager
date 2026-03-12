@@ -326,6 +326,8 @@ receiptNumber:receipt,
 paidDate:date
 });
 
+alert("Payment recorded. Receipt No: "+receipt);
+
 loadStudents();
 
 }
@@ -440,7 +442,7 @@ let reminder=s.paid
 :`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
 
 let receipt=s.paid
-?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber}','${s.paidDate}')">Resend Receipt</button>`
+?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
 :"";
 
 tbody.innerHTML+=`
