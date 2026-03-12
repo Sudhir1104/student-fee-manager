@@ -119,6 +119,11 @@ color:#e53935;
 font-weight:bold;
 }
 
+.paid{
+color:#28a745;
+font-weight:bold;
+}
+
 .disabled-btn{
 background:#ccc;
 color:#666;
@@ -286,7 +291,7 @@ color:#666;
 </div>
 
 <input id="name" placeholder="Student Name">
-<input id="phone" placeholder="Parent Phone">
+<input id="phone" placeholder="Parent Phone (10 digits)">
 <input id="course" placeholder="Course">
 <input id="fee" type="number" placeholder="Monthly Fee">
 <input id="due" type="date" value="2026-03-10">
@@ -368,10 +373,25 @@ async function logout(){
   window.location.href="login.html";
 }
 
+// Fixed phone cleaning function
 function cleanPhone(phone){
-phone=phone.replace(/\D/g,'');
-if(!phone.startsWith("91")) phone="91"+phone;
-return phone;
+  // Remove all non-numeric characters
+  phone = phone.replace(/\D/g, '');
+  
+  // If it's a 10-digit number, add 91 prefix
+  if (phone.length === 10) {
+    phone = '91' + phone;
+  }
+  // If it starts with 0, remove the 0 and add 91
+  else if (phone.length === 11 && phone.startsWith('0')) {
+    phone = '91' + phone.substring(1);
+  }
+  // If it's longer than 10 but doesn't start with 91, take last 10 digits and add 91
+  else if (phone.length > 10 && !phone.startsWith('91')) {
+    phone = '91' + phone.slice(-10);
+  }
+  
+  return phone;
 }
 
 // Calculate late fee - if today is after the 10th and not paid, add late fee
@@ -402,38 +422,59 @@ function searchStudents() {
   }
 }
 
+// FIXED: Send reminder with proper WhatsApp URL formatting
 function sendReminder(phone, name, baseFee, lateFee, total){
-phone=cleanPhone(phone);
-let message=
-"Dear Parent,\n\n"+
-"This is a reminder that the fee for *" + name + "* is overdue.\n\n"+
-"Monthly Fee: ₹" + baseFee + "\n" +
-"Late Fee (after 10th): ₹" + lateFee + "\n" +
-"Total Due: ₹" + total + "\n\n"+
-"Please make payment immediately to avoid further penalties.\n\n"+
-"Srishti Centre for Performing Arts\n" +
-"Note: Late fee of ₹100 applies after the 10th of every month.";
-
-let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
-window.open(url,'_blank');
+  // Clean and validate phone number
+  phone = cleanPhone(phone);
+  
+  // Ensure phone has country code (should be 91xxxx... after cleanPhone)
+  if (!phone || phone.length < 12) {
+    alert("Invalid phone number. Please check and try again.");
+    return;
+  }
+  
+  // Create message without special characters that might break the URL
+  let message = "Dear Parent,\n\n";
+  message += "REMINDER: Fee Payment Due\n\n";
+  message += "Student: " + name + "\n";
+  message += "Monthly Fee: ₹" + baseFee + "\n";
+  message += "Late Fee (after 10th): ₹" + lateFee + "\n";
+  message += "TOTAL DUE: ₹" + total + "\n\n";
+  message += "Please make payment immediately to avoid further penalties.\n\n";
+  message += "Srishti Centre for Performing Arts";
+  
+  // Use https://wa.me/ format which is more reliable
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  
+  // Open in new window
+  window.open(url, '_blank');
 }
 
-function sendReceipt(phone,name,amount,receipt,date,lateFee){
-phone=cleanPhone(phone);
-let message=
-"Srishti Centre for Performing Arts\n\n"+
-"RECEIPT\n\n"+
-"Receipt No: " + receipt + "\n"+
-"Student: " + name + "\n"+
-"Monthly Fee: ₹" + (amount - lateFee) + "\n"+
-"Late Fee: ₹" + lateFee + "\n"+
-"Total Amount Paid: ₹" + amount + "\n"+
-"Date: " + date + "\n\n"+
-"Thank you for your payment.\n"+
-"Next month's fee is due by the 10th.";
-
-let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
-window.open(url,'_blank');
+// FIXED: Send receipt with proper WhatsApp URL formatting
+function sendReceipt(phone, name, amount, receipt, date, lateFee){
+  // Clean and validate phone number
+  phone = cleanPhone(phone);
+  
+  if (!phone || phone.length < 12) {
+    alert("Invalid phone number. Please check and try again.");
+    return;
+  }
+  
+  let message = "Srishti Centre for Performing Arts\n\n";
+  message += "PAYMENT RECEIPT\n\n";
+  message += "Receipt No: " + receipt + "\n";
+  message += "Student: " + name + "\n";
+  message += "Monthly Fee: ₹" + (amount - lateFee) + "\n";
+  message += "Late Fee: ₹" + lateFee + "\n";
+  message += "Total Amount Paid: ₹" + amount + "\n";
+  message += "Date: " + date + "\n\n";
+  message += "Thank you for your payment.\n";
+  message += "Next month's fee is due by the 10th.";
+  
+  // Use https://wa.me/ format which is more reliable
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  
+  window.open(url, '_blank');
 }
 
 async function loadStudents(){
@@ -472,6 +513,13 @@ try {
   
   if (!name || !phone || !course || !fee || !due) {
     alert("Please fill in all fields");
+    return;
+  }
+  
+  // Validate phone number (should be 10 digits)
+  let digitsOnly = phone.replace(/\D/g, '');
+  if (digitsOnly.length !== 10) {
+    alert("Please enter a valid 10-digit phone number");
     return;
   }
   
@@ -550,8 +598,15 @@ try {
   let s = students.find(x => x.id == id);
   if (!s) return;
   
-  let newPhone = prompt("Edit phone (with country code)", s.phone);
+  let newPhone = prompt("Edit phone (10 digits)", s.phone.replace('91', ''));
   if (newPhone === null) return;
+  
+  // Validate phone
+  let digitsOnly = newPhone.replace(/\D/g, '');
+  if (digitsOnly.length !== 10) {
+    alert("Please enter a valid 10-digit phone number");
+    return;
+  }
   
   let newFee = prompt("Edit monthly fee amount", s.fee);
   if (newFee === null) return;
@@ -698,27 +753,29 @@ filtered.forEach(s => {
     day: 'numeric'
   });
   
-  // Escape special characters for HTML attributes
-  let safePhone = (s.phone || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-  let safeName = (s.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  // Display phone number without 91 prefix for better readability
+  let displayPhone = s.phone || '';
+  if (displayPhone.startsWith('91') && displayPhone.length === 12) {
+    displayPhone = displayPhone.substring(2);
+  }
   
   // Reminder button - only show if after 10th and not paid
   let reminder = s.paid
     ? '<span class="disabled-btn">Paid</span>'
     : (isAfterTenth 
-        ? `<button onclick="sendReminder('${safePhone}','${safeName}','${s.fee}','${lateFee}','${total}')">📱 Send Reminder</button>`
+        ? `<button onclick="sendReminder('${s.id}')">📱 Send Reminder</button>`
         : '<span class="disabled-btn">Reminder (after 10th)</span>');
   
   // Receipt button for paid students
   let receiptBtn = s.paid
-    ? `<button onclick="sendReceipt('${safePhone}','${safeName}','${total}','${s.receiptNumber || 'N/A'}','${s.paidDate || ''}','${lateFee}')">📱 Receipt</button>`
+    ? `<button onclick="sendReceipt('${s.id}')">📱 Receipt</button>`
     : "";
   
-  // Table row
+  // Table row - pass only the ID to functions
   tbody.innerHTML += `
 <tr>
   <td>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
-  <td>${s.phone || ''}</td>
+  <td>${displayPhone}</td>
   <td>${s.course || ''}</td>
   <td>₹${s.fee || 0}</td>
   <td>₹${lateFee}</td>
@@ -740,7 +797,7 @@ filtered.forEach(s => {
 <div class="mobile-card">
   <h3>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee</span>' : ''}</h3>
   <strong>Course:</strong> ${s.course || ''}<br>
-  <strong>Phone:</strong> ${s.phone || ''}<br>
+  <strong>Phone:</strong> ${displayPhone}<br>
   <strong>Monthly Fee:</strong> ₹${s.fee || 0}<br>
   <strong>Late Fee:</strong> ₹${lateFee}<br>
   <strong>Total Due:</strong> ₹${total}<br>
@@ -760,14 +817,31 @@ filtered.forEach(s => {
 });
 }
 
-// Make functions globally available
+// Wrapper functions that get student data by ID
+window.sendReminder = function(id) {
+  let student = students.find(s => s.id === id);
+  if (student) {
+    let lateFee = calculateLateFee(student.due, false);
+    let total = parseInt(student.fee) + lateFee;
+    sendReminder(student.phone, student.name, student.fee, lateFee, total);
+  }
+};
+
+window.sendReceipt = function(id) {
+  let student = students.find(s => s.id === id);
+  if (student && student.paid) {
+    let lateFee = calculateLateFee(student.due, true);
+    let total = parseInt(student.fee) + lateFee;
+    sendReceipt(student.phone, student.name, total, student.receiptNumber, student.paidDate, lateFee);
+  }
+};
+
+// Make other functions globally available
 window.addStudent = addStudent;
 window.markPaid = markPaid;
 window.deleteStudent = deleteStudent;
 window.editStudent = editStudent;
-window.sendReminder = sendReminder;
 window.sendReminders = sendReminders;
-window.sendReceipt = sendReceipt;
 window.downloadReport = downloadReport;
 window.searchStudents = searchStudents;
 window.logout = logout;
