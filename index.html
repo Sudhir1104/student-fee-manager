@@ -255,7 +255,7 @@ color:#666;
 </div>
 
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
-Send reminders
+📩 Send Fine Notice to All Overdue Students
 </button>
 
 <!-- Search Bar -->
@@ -352,8 +352,11 @@ phone=cleanPhone(phone);
 
 let message=
 "Dear Parent,\n\n"+
-"Fee for "+name+" ₹"+total+" is overdue.\n"+
-"Please make payment immediately.\n\n"+
+"This is a reminder that the fee for *"+name+"* is overdue.\n\n"+
+"Fee: ₹"+(total-100)+"\n"+
+"Late Fine: ₹100\n"+
+"Total Due: ₹"+total+"\n\n"+
+"Please make payment immediately to avoid further penalties.\n\n"+
 "Srishti Centre for Performing Arts";
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
@@ -473,16 +476,22 @@ window.open(qr,'_blank');
 
 function sendReminders(){
 
+let count=0;
+
 students.forEach((s)=>{
 
 let today=new Date();
 let due=new Date(s.due);
 
 if(!s.paid && today>due){
-sendReminder(s.phone,s.name,s.fee);
+let total=parseInt(s.fee)+100;
+sendReminder(s.phone,s.name,total);
+count++;
 }
 
 });
+
+if(count===0) alert("No overdue students found.");
 
 }
 
@@ -537,8 +546,7 @@ let due=new Date(s.due);
 let late=0;
 
 if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
+late=100;
 overdueCount++;
 }
 
@@ -559,8 +567,7 @@ let late=0;
 let status="Pending";
 
 if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
+late=100;
 status="Overdue";
 }
 
