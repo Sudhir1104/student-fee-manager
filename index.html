@@ -283,7 +283,7 @@ color:#666;
 <!-- Search Bar -->
 <div class="search-wrapper">
 <span class="search-icon">🔍</span>
-<input id="searchInput" placeholder="Search student by name..." onkeyup="render()">
+<input id="searchInput" type="text" placeholder="Search student by name..." onkeyup="searchStudents()" oninput="searchStudents()">
 </div>
 
 <input id="name" placeholder="Student Name">
@@ -347,8 +347,10 @@ const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const auth=getAuth(app);
 
-// Global students array
-let students=[];
+// Global variables
+let students = [];
+let filteredStudents = []; // Add this for search functionality
+let currentSearchQuery = "";
 
 // Constants
 const LATE_FEE_AMOUNT = 100;
@@ -444,6 +446,15 @@ function calculateSimpleLateFee(dueDate, isPaid) {
   return 0;
 }
 
+// Search function
+function searchStudents() {
+  let searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    currentSearchQuery = searchInput.value.trim().toLowerCase();
+    render();
+  }
+}
+
 function sendReminder(phone, name, baseFee, lateFee, total){
 phone=cleanPhone(phone);
 let message=
@@ -488,6 +499,13 @@ try {
     data.id = docSnap.id;
     students.push(data);
   });
+  
+  // Reset search when loading new data
+  currentSearchQuery = "";
+  let searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.value = "";
+  }
   
   render();
 } catch (error) {
@@ -684,15 +702,16 @@ let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY)
 tenthOfMonth.setHours(0,0,0,0);
 let isAfterTenth = today >= tenthOfMonth;
 
-// Get search query
-let query = document.getElementById("searchInput").value.trim().toLowerCase();
+// Filter students based on search query
+let filtered = students;
+if (currentSearchQuery) {
+  filtered = students.filter(s => 
+    s.name && s.name.toLowerCase().includes(currentSearchQuery)
+  );
+}
+filteredStudents = filtered; // Store filtered results
 
-// Filter students by name
-let filtered = query
-  ? students.filter(s => s.name && s.name.toLowerCase().includes(query))
-  : students;
-
-// Dashboard calculations using ALL students
+// Dashboard calculations using ALL students (not filtered)
 students.forEach(s => {
   let lateFee = calculateSimpleLateFee(s.due, s.paid);
   let total = parseInt(s.fee || 0) + lateFee;
@@ -716,10 +735,11 @@ document.getElementById("overdue").innerHTML = "Overdue: " + overdueCount;
 document.getElementById("lateFees").innerHTML = "Late Fees: ₹" + totalLateFees;
 
 // Show no results message if needed
-if (filtered.length === 0 && query) {
-  let noResultsMsg = `<tr><td colspan="12" class="no-results">No student found matching "${query}"</td></tr>`;
+if (filtered.length === 0 && currentSearchQuery) {
+  let noResultsMsg = `<tr><td colspan="12" class="no-results">No student found matching "${currentSearchQuery}"</td></tr>`;
   tbody.innerHTML = noResultsMsg;
-  mobile.innerHTML = `<div class="no-results">No student found matching "${query}"</div>`;
+  mobile.innerHTML = `<div class="no-results">No student found matching "${currentSearchQuery}"</div>`;
+  return; // Exit early since there are no results to display
 }
 
 // Render filtered students
@@ -746,10 +766,10 @@ filtered.forEach(s => {
   let lateFeeIndicator = lateFee > 0 ? ' <span class="late-fee-badge">+₹' + lateFee + '</span>' : '';
   
   // Escape special characters for HTML attributes
-  let safePhone = (s.phone || '').replace(/'/g, "&apos;");
-  let safeName = (s.name || '').replace(/'/g, "&apos;");
-  let safeReceipt = (s.receiptNumber || 'N/A').replace(/'/g, "&apos;");
-  let safePaidDate = (s.paidDate || '').replace(/'/g, "&apos;");
+  let safePhone = (s.phone || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  let safeName = (s.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  let safeReceipt = (s.receiptNumber || 'N/A').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  let safePaidDate = (s.paidDate || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
   
   // Reminder button - only show if after 10th and not paid
   let reminder = s.paid
@@ -823,6 +843,7 @@ window.sendReceipt = sendReceipt;
 window.downloadReport = downloadReport;
 window.render = render;
 window.logout = logout;
+window.searchStudents = searchStudents; // Add this to make search function available globally
 
 </script>
 
