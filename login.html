@@ -1,124 +1,203 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="UTF-8">
-<title>Srishti Centre Login</title>
+<title>Login – Srishti Centre</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 
+*{ box-sizing:border-box; margin:0; padding:0; }
+
 body{
-font-family:Arial;
-background:#eef2f7;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+  font-family: Arial, sans-serif;
+  background: #eef2f7;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-.login-box{
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 3px 12px rgba(0,0,0,0.2);
-width:300px;
+.card{
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  padding: 40px 35px;
+  width: 100%;
+  max-width: 400px;
 }
 
-input{
-width:100%;
-padding:10px;
-margin:5px 0;
-border-radius:6px;
-border:1px solid #ccc;
+.header{
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-button{
-width:100%;
-padding:10px;
-margin-top:10px;
-background:#2d89ef;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
+.header img{
+  height: 70px;
+  margin-bottom: 12px;
 }
 
-button:hover{
-background:#1b5fbf;
+.header h1{
+  font-size: 18px;
+  color: #2d89ef;
+}
+
+.header p{
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+label{
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
+  margin-top: 16px;
+}
+
+input[type="email"],
+input[type="password"]{
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 7px;
+  font-size: 14px;
+  transition: border 0.2s;
+  outline: none;
+}
+
+input:focus{
+  border-color: #2d89ef;
+  box-shadow: 0 0 0 3px rgba(45,137,239,0.12);
+}
+
+.login-btn{
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  background: #2d89ef;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-btn:hover{
+  background: #1b5fbf;
+}
+
+.login-btn:disabled{
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.error{
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #fdecea;
+  border: 1px solid #f5c6c2;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 13px;
+  display: none;
+}
+
+.footer{
+  text-align: center;
+  margin-top: 30px;
+  font-size: 12px;
+  color: #aaa;
 }
 
 </style>
-
 </head>
-
 <body>
 
-<div class="login-box">
+<div class="card">
 
-<h2>Srishti Centre</h2>
+  <div class="header">
+    <img src="logo.png" onerror="this.style.display='none'">
+    <h1>Srishti Centre for Performing Arts</h1>
+    <p>Sign in to access the Fee Manager</p>
+  </div>
 
-<input id="email" placeholder="Email">
+  <label>Email</label>
+  <input type="email" id="email" placeholder="you@example.com">
 
-<input id="password" type="password" placeholder="Password">
+  <label>Password</label>
+  <input type="password" id="password" placeholder="••••••••">
 
-<button onclick="login()">Login</button>
+  <button class="login-btn" id="loginBtn" onclick="login()">Sign In</button>
+
+  <div class="error" id="errorMsg"></div>
+
+  <div class="footer">© Srishti Centre for Performing Arts</div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import { getAuth, signInWithEmailAndPassword }
-
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
-
-apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
-
-authDomain:"student-fee-manager-98c51.firebaseapp.com",
-
-projectId:"student-fee-manager-98c51",
-
-storageBucket:"student-fee-manager-98c51.firebasestorage.app",
-
-messagingSenderId:"463103595080",
-
-appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
-
+  apiKey: "AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
+  authDomain: "student-fee-manager-98c51.firebaseapp.com",
+  projectId: "student-fee-manager-98c51",
+  storageBucket: "student-fee-manager-98c51.firebasestorage.app",
+  messagingSenderId: "463103595080",
+  appId: "1:463103595080:web:3f0e964edd906fb1d23e7d"
 };
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 
-window.login = async function(){
+// If already logged in, go straight to app
+onAuthStateChanged(auth, (user) => {
+  if(user) window.location.href = "index.html";
+});
 
-let email = document.getElementById("email").value;
+async function login(){
 
-let password = document.getElementById("password").value;
+  let email = document.getElementById("email").value.trim();
+  let password = document.getElementById("password").value;
+  let btn = document.getElementById("loginBtn");
+  let err = document.getElementById("errorMsg");
 
-try{
+  err.style.display = "none";
+  btn.disabled = true;
+  btn.textContent = "Signing in...";
 
-await signInWithEmailAndPassword(auth,email,password);
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    window.location.href = "index.html";
+  } catch(e) {
+    let msg = "Login failed. Please check your email and password.";
+    if(e.code === "auth/user-not-found") msg = "No account found with this email.";
+    if(e.code === "auth/wrong-password") msg = "Incorrect password.";
+    if(e.code === "auth/invalid-email") msg = "Invalid email address.";
+    if(e.code === "auth/too-many-requests") msg = "Too many attempts. Try again later.";
+    err.textContent = msg;
+    err.style.display = "block";
+  }
 
-window.location.href="index.html";
+  btn.disabled = false;
+  btn.textContent = "Sign In";
 
 }
 
-catch(err){
+// Allow pressing Enter to submit
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Enter") login();
+});
 
-alert("Login failed");
-
-}
-
-}
+window.login = login;
 
 </script>
 
 </body>
-
 </html>
