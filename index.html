@@ -82,7 +82,7 @@ opacity:0.9;
 }
 
 .container{
-max-width:1200px;
+max-width:1000px;
 margin:auto;
 background:white;
 padding:20px;
@@ -90,7 +90,7 @@ border-radius:10px;
 box-shadow:0 3px 12px rgba(0,0,0,0.15);
 }
 
-input,button,select{
+input,button{
 padding:10px;
 margin:5px 0;
 width:100%;
@@ -119,11 +119,6 @@ color:#e53935;
 font-weight:bold;
 }
 
-.paid{
-color:#28a745;
-font-weight:bold;
-}
-
 .disabled-btn{
 background:#ccc;
 color:#666;
@@ -147,20 +142,6 @@ color:white;
 padding:15px;
 border-radius:8px;
 text-align:center;
-min-width:120px;
-}
-
-.card.paid-card{
-background:#28a745;
-}
-
-.card.pending-card{
-background:#ffc107;
-color:#333;
-}
-
-.card.overdue-card{
-background:#e53935;
 }
 
 table{
@@ -239,192 +220,6 @@ color: #e53935;
 margin-top: 5px;
 }
 
-.qr-preview{
-max-width: 150px;
-margin: 10px auto;
-display: block;
-}
-
-.qr-settings{
-background: #f5f5f5;
-padding: 15px;
-border-radius: 8px;
-margin-bottom: 15px;
-}
-
-.qr-settings h3{
-margin-top: 0;
-color: #2d89ef;
-}
-
-/* Report Section Styles */
-.report-section{
-background: #f8f9fa;
-border-radius: 10px;
-padding: 20px;
-margin: 20px 0;
-border: 2px solid #2d89ef;
-}
-
-.report-header{
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-
-.report-header h3{
-margin: 0;
-color: #2d89ef;
-font-size: 20px;
-}
-
-.report-actions{
-display: flex;
-gap: 10px;
-}
-
-.report-actions button{
-width: auto;
-padding: 8px 16px;
-margin: 0;
-}
-
-.report-summary{
-display: flex;
-gap: 15px;
-flex-wrap: wrap;
-margin-bottom: 20px;
-}
-
-.summary-card{
-flex: 1;
-min-width: 150px;
-background: white;
-padding: 15px;
-border-radius: 8px;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-text-align: center;
-border-left: 4px solid #2d89ef;
-}
-
-.summary-card.paid{
-border-left-color: #28a745;
-}
-
-.summary-card.pending{
-border-left-color: #ffc107;
-}
-
-.summary-card.overdue{
-border-left-color: #e53935;
-}
-
-.summary-card h4{
-margin: 0 0 10px 0;
-color: #666;
-font-size: 14px;
-}
-
-.summary-card .number{
-font-size: 28px;
-font-weight: bold;
-color: #333;
-}
-
-.summary-card .percentage{
-font-size: 14px;
-color: #666;
-margin-top: 5px;
-}
-
-.summary-card .amount{
-font-size: 18px;
-color: #2d89ef;
-margin-top: 5px;
-}
-
-.report-filters{
-display: flex;
-gap: 10px;
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-
-.report-filters select, .report-filters input{
-width: auto;
-flex: 1;
-min-width: 150px;
-margin: 0;
-}
-
-.report-table-container{
-max-height: 400px;
-overflow-y: auto;
-border: 1px solid #ddd;
-border-radius: 8px;
-background: white;
-}
-
-.report-table{
-width: 100%;
-border-collapse: collapse;
-}
-
-.report-table th{
-background: #2d89ef;
-color: white;
-padding: 12px;
-position: sticky;
-top: 0;
-z-index: 10;
-}
-
-.report-table td{
-padding: 10px 12px;
-border-bottom: 1px solid #eee;
-}
-
-.report-table tr:hover{
-background: #f5f5f5;
-}
-
-.report-table .status-badge{
-display: inline-block;
-padding: 4px 8px;
-border-radius: 4px;
-font-size: 12px;
-font-weight: bold;
-}
-
-.status-paid{
-background: #d4edda;
-color: #155724;
-}
-
-.status-pending{
-background: #fff3cd;
-color: #856404;
-}
-
-.status-overdue{
-background: #f8d7da;
-color: #721c24;
-}
-
-.report-footer{
-margin-top: 20px;
-display: flex;
-justify-content: flex-end;
-gap: 10px;
-}
-
-.report-footer button{
-width: auto;
-padding: 8px 16px;
-}
-
 @media(max-width:700px){
 
 table{display:none}
@@ -433,22 +228,6 @@ table{display:none}
 .logo-row{
 flex-direction:column;
 text-align:center;
-}
-
-.report-filters{
-flex-direction: column;
-}
-
-.report-filters select, .report-filters input{
-width: 100%;
-}
-
-.report-actions{
-flex-direction: column;
-}
-
-.report-actions button{
-width: 100%;
 }
 
 }
@@ -489,85 +268,13 @@ color:#666;
 
 </div>
 
-<!-- QR Code Settings -->
-<div class="qr-settings">
-<h3>⚙️ QR Code Payment Settings</h3>
-<div style="display: flex; gap: 10px; flex-wrap: wrap;">
-<div style="flex: 1;">
-<label>UPI ID / VPA:</label>
-<input type="text" id="upiId" value="61407789476@icici" placeholder="e.g., 61407789476@icici">
-</div>
-<div style="flex: 1;">
-<label>Payee Name:</label>
-<input type="text" id="payeeName" value="Srishti Centre" placeholder="Your name">
-</div>
-<div style="flex: 1;">
-<label>Include QR in Reminders:</label>
-<select id="includeQRInReminders">
-<option value="link">Send QR Code Link</option>
-<option value="upi">Send UPI Payment Link</option>
-<option value="both" selected>Send Both</option>
-</select>
-</div>
-</div>
-</div>
-
-<!-- Quick Stats Dashboard -->
 <div class="dashboard">
-<div class="card" id="totalStudents">Total: 0</div>
-<div class="card paid-card" id="paidStudents">Paid: 0</div>
-<div class="card pending-card" id="pendingStudents">Pending: 0</div>
-<div class="card overdue-card" id="overdueStudents">Overdue: 0</div>
-<div class="card" id="totalCollected">Collected: ₹0</div>
-<div class="card" id="totalPending">Pending: ₹0</div>
-<div class="card" id="totalLateFees">Late Fees: ₹0</div>
+<div class="card" id="students">Students: 0</div>
+<div class="card" id="collected">Collected: ₹0</div>
+<div class="card" id="pending">Pending: ₹0</div>
+<div class="card" id="overdue">Overdue: 0</div>
 </div>
 
-<!-- Report Section -->
-<div class="report-section">
-<div class="report-header">
-<h3>📊 Payment Report</h3>
-<div class="report-actions">
-<button onclick="generateSimpleReport()" style="background:#28a745;">📋 Simple Report</button>
-<button onclick="generateDetailedReport()" style="background:#17a2b8;">📑 Detailed Report</button>
-<button onclick="downloadReportPDF()" style="background:#dc3545;">📥 Download PDF</button>
-<button onclick="printReport()" style="background:#6c757d;">🖨️ Print Report</button>
-</div>
-</div>
-
-<div class="report-summary" id="reportSummary">
-<!-- Dynamic summary cards will be inserted here -->
-</div>
-
-<div class="report-filters">
-<select id="reportFilter">
-<option value="all">All Students</option>
-<option value="paid">Paid Only</option>
-<option value="pending">Pending Only</option>
-<option value="overdue">Overdue Only</option>
-</select>
-<input type="text" id="reportSearch" placeholder="Search in report..." onkeyup="filterReport()">
-<select id="reportSort">
-<option value="name">Sort by Name</option>
-<option value="fee">Sort by Fee</option>
-<option value="due">Sort by Due Date</option>
-<option value="status">Sort by Status</option>
-</select>
-<button onclick="filterReport()" style="width: auto;">Apply Filters</button>
-</div>
-
-<div class="report-table-container" id="reportContainer">
-<!-- Report table will be inserted here -->
-</div>
-
-<div class="report-footer">
-<div id="reportStats"></div>
-<button onclick="exportReportToExcel()" style="background:#28a745;">📊 Export to Excel</button>
-<button onclick="copyReportToClipboard()" style="background:#6c757d;">📋 Copy to Clipboard</button>
-</div>
-</div>
-
-<!-- Action Buttons -->
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
 📩 Send Fine Notice to All Overdue Students (After 10th of Month)
 </button>
@@ -578,7 +285,6 @@ color:#666;
 <input id="searchInput" type="text" placeholder="Search student by name..." onkeyup="searchStudents()" oninput="searchStudents()">
 </div>
 
-<!-- Add Student Form -->
 <input id="name" placeholder="Student Name">
 <input id="phone" placeholder="Parent Phone">
 <input id="course" placeholder="Course">
@@ -588,8 +294,8 @@ color:#666;
 <button onclick="addStudent()">Add Student</button>
 <button onclick="downloadReport()">Download Excel</button>
 
-<!-- Student Table -->
 <table>
+
 <thead>
 <tr>
 <th>Name</th>
@@ -602,11 +308,11 @@ color:#666;
 <th>Due Date</th>
 <th>Actions</th>
 <th>Reminder</th>
-<th>QR</th>
-<th>Receipt</th>
 </tr>
 </thead>
+
 <tbody id="table"></tbody>
+
 </table>
 
 <div id="mobileList" class="mobile-list"></div>
@@ -640,7 +346,6 @@ const auth=getAuth(app);
 
 // Global variables
 let students = [];
-let filteredStudents = [];
 let currentSearchQuery = "";
 
 // Constants
@@ -655,151 +360,30 @@ onAuthStateChanged(auth,(user)=>{
     document.getElementById("userEmail").textContent=user.email;
     document.querySelector(".container").style.display="block";
     loadStudents();
-    
-    // Load saved UPI settings from localStorage
-    loadUPISettings();
   }
 });
 
-// Load UPI settings from localStorage
-function loadUPISettings() {
-  let savedUPI = localStorage.getItem('srishti_upi_id');
-  let savedName = localStorage.getItem('srishti_payee_name');
-  let savedQRSetting = localStorage.getItem('srishti_qr_setting');
-  
-  if (savedUPI) document.getElementById('upiId').value = savedUPI;
-  if (savedName) document.getElementById('payeeName').value = savedName;
-  if (savedQRSetting) document.getElementById('includeQRInReminders').value = savedQRSetting;
+async function logout(){
+  await signOut(auth);
+  window.location.href="login.html";
 }
 
-// Save UPI settings to localStorage
-function saveUPISettings() {
-  let upiId = document.getElementById('upiId').value;
-  let payeeName = document.getElementById('payeeName').value;
-  let qrSetting = document.getElementById('includeQRInReminders').value;
-  
-  localStorage.setItem('srishti_upi_id', upiId);
-  localStorage.setItem('srishti_payee_name', payeeName);
-  localStorage.setItem('srishti_qr_setting', qrSetting);
+function cleanPhone(phone){
+phone=phone.replace(/\D/g,'');
+if(!phone.startsWith("91")) phone="91"+phone;
+return phone;
 }
 
-// Generate UPI payment link
-function generateUPILink(name, amount, upiId, payeeName) {
-  let cleanName = encodeURIComponent(name);
-  let cleanPayeeName = encodeURIComponent(payeeName || 'Srishti Centre');
-  let upiLink = `upi://pay?pa=${upiId}&pn=${cleanPayeeName}&am=${amount}&tn=Fee for ${cleanName}&cu=INR`;
-  return upiLink;
-}
-
-// Generate QR code URL
-function generateQRCodeURL(data) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
-}
-
-// Send reminder with QR code
-function sendReminderWithQR(phone, name, baseFee, lateFee, total) {
-  phone = cleanPhone(phone);
-  
-  let upiId = document.getElementById('upiId').value || '61407789476@icici';
-  let payeeName = document.getElementById('payeeName').value || 'Srishti Centre';
-  let qrSetting = document.getElementById('includeQRInReminders').value;
-  
-  // Generate UPI link
-  let upiLink = generateUPILink(name, total, upiId, payeeName);
-  
-  // Generate QR code URL
-  let qrCodeURL = generateQRCodeURL(upiLink);
-  
-  let message = 
-"Dear Parent,\n\n" +
-"*REMINDER: Fee Payment Due*\n\n" +
-"Student: " + name + "\n" +
-"Monthly Fee: ₹" + baseFee + "\n" +
-"Late Fee (after 10th): ₹" + lateFee + "\n" +
-"*Total Due: ₹" + total + "*\n\n";
-
-  // Add QR code or payment link based on settings
-  if (qrSetting === 'link' || qrSetting === 'both') {
-    message += "🔗 *Quick Payment Link:*\n" + upiLink + "\n\n";
-  }
-  
-  if (qrSetting === 'both') {
-    message += "📱 *Scan QR Code for Payment:*\n";
-  }
-  
-  if (qrSetting === 'qr' || qrSetting === 'both') {
-    message += qrCodeURL + "\n\n";
-  }
-  
-  message += 
-"💳 *How to Pay:*\n" +
-"1. Click the link above OR\n" +
-"2. Open any UPI app (Google Pay, PhonePe, Paytm)\n" +
-"3. Scan the QR code or use the link\n" +
-"4. Enter amount ₹" + total + "\n" +
-"5. Complete payment\n\n" +
-"Please make payment immediately to avoid further penalties.\n\n" +
-"Srishti Centre for Performing Arts\n" +
-"Note: Late fee of ₹100 applies after the 10th of every month.";
-
-  let url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(message);
-  window.open(url, '_blank');
-}
-
-// Keep the original function for backward compatibility
-function sendReminder(phone, name, baseFee, lateFee, total) {
-  // Use the new QR-enabled function
-  sendReminderWithQR(phone, name, baseFee, lateFee, total);
-}
-
-function sendReceipt(phone, name, amount, receipt, date, lateFee) {
-  phone = cleanPhone(phone);
-  
-  let upiId = document.getElementById('upiId').value || '61407789476@icici';
-  let payeeName = document.getElementById('payeeName').value || 'Srishti Centre';
-  
-  let message = 
-"Srishti Centre for Performing Arts\n\n" +
-"*PAYMENT RECEIPT*\n\n" +
-"Receipt No: " + receipt + "\n" +
-"Student: " + name + "\n" +
-"Monthly Fee: ₹" + (amount - lateFee) + "\n" +
-"Late Fee: ₹" + lateFee + "\n" +
-"*Total Amount Paid: ₹" + amount + "*\n" +
-"Date: " + date + "\n\n" +
-"Thank you for your payment.\n\n" +
-"Next month's fee is due by the 10th.\n\n" +
-"For quick payment next month, use this UPI ID:\n" + upiId;
-
-  let url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(message);
-  window.open(url, '_blank');
-}
-
-function logout(){
-  signOut(auth);
-}
-
-function cleanPhone(phone) {
-  // Remove all non-numeric characters
-  phone = phone.replace(/\D/g, '');
-  // Ensure it starts with 91 for India
-  if (phone.length === 10) {
-    phone = '91' + phone;
-  } else if (phone.length > 10 && !phone.startsWith('91')) {
-    phone = '91' + phone.slice(-10);
-  }
-  return phone;
-}
-
-function calculateSimpleLateFee(dueDate, isPaid) {
+// Calculate late fee - if today is after the 10th and not paid, add late fee
+function calculateLateFee(dueDate, isPaid) {
   if (isPaid) return 0;
   
   let today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setHours(0,0,0,0);
   
   // Get the 10th of current month
   let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-  tenthOfMonth.setHours(0, 0, 0, 0);
+  tenthOfMonth.setHours(0,0,0,0);
   
   // If today is on or after the 10th of current month
   if (today >= tenthOfMonth) {
@@ -809,847 +393,371 @@ function calculateSimpleLateFee(dueDate, isPaid) {
   return 0;
 }
 
-async function loadStudents() {
-  try {
-    const querySnapshot = await getDocs(collection(db, "students"));
-    students = [];
-    querySnapshot.forEach((doc) => {
-      students.push({ id: doc.id, ...doc.data() });
-    });
-    render();
-    generateSimpleReport(); // Generate report automatically when loading students
-  } catch (error) {
-    console.error("Error loading students:", error);
-    alert("Error loading students. Please refresh the page.");
-  }
-}
-
-async function addStudent() {
-  try {
-    let name = document.getElementById('name').value;
-    let phone = document.getElementById('phone').value;
-    let course = document.getElementById('course').value;
-    let fee = document.getElementById('fee').value;
-    let due = document.getElementById('due').value;
-    
-    if (!name || !phone || !course || !fee || !due) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    let student = {
-      name: name,
-      phone: cleanPhone(phone),
-      course: course,
-      fee: parseInt(fee),
-      due: due,
-      paid: false,
-      createdAt: new Date().toISOString()
-    };
-    
-    await addDoc(collection(db, "students"), student);
-    
-    // Clear form
-    document.getElementById('name').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('course').value = '';
-    document.getElementById('fee').value = '';
-    document.getElementById('due').value = '2026-03-10';
-    
-    loadStudents();
-    alert('Student added successfully!');
-  } catch (error) {
-    console.error("Error adding student:", error);
-    alert("Error adding student. Please try again.");
-  }
-}
-
-async function markPaid(id) {
-  try {
-    let student = students.find(s => s.id === id);
-    if (!student) return;
-    
-    let lateFee = calculateSimpleLateFee(student.due, false);
-    let total = student.fee + lateFee;
-    
-    let receipt = "RCPT-" + Date.now();
-    let date = new Date().toISOString().slice(0,10);
-    
-    await updateDoc(doc(db, "students", id), {
-      paid: true,
-      receiptNumber: receipt,
-      paidDate: date,
-      lateFeePaid: lateFee,
-      totalPaid: total
-    });
-    
-    alert(`Payment recorded!\nReceipt: ${receipt}\nAmount: ₹${total} (Fee: ₹${student.fee}, Late Fee: ₹${lateFee})`);
-    loadStudents();
-  } catch (error) {
-    console.error("Error marking as paid:", error);
-    alert("Error recording payment. Please try again.");
-  }
-}
-
-async function deleteStudent(id) {
-  if (!confirm('Are you sure you want to delete this student?')) return;
-  
-  try {
-    await deleteDoc(doc(db, "students", id));
-    loadStudents();
-    alert('Student deleted successfully!');
-  } catch (error) {
-    console.error("Error deleting student:", error);
-    alert("Error deleting student. Please try again.");
-  }
-}
-
-async function editStudent(id) {
-  try {
-    let student = students.find(s => s.id === id);
-    if (!student) return;
-    
-    let newPhone = prompt('Enter new phone number:', student.phone);
-    if (newPhone) {
-      let newFee = prompt('Enter new fee amount:', student.fee);
-      if (newFee) {
-        await updateDoc(doc(db, "students", id), {
-          phone: cleanPhone(newPhone),
-          fee: parseInt(newFee)
-        });
-        loadStudents();
-        alert('Student updated successfully!');
-      }
-    }
-  } catch (error) {
-    console.error("Error editing student:", error);
-    alert("Error updating student. Please try again.");
-  }
-}
-
-function paymentQR(name, amount) {
-  let upiId = document.getElementById('upiId').value || '61407789476@icici';
-  let payeeName = document.getElementById('payeeName').value || 'Srishti Centre';
-  
-  let upiLink = generateUPILink(name, amount, upiId, payeeName);
-  let qrCodeURL = generateQRCodeURL(upiLink);
-  
-  // Open QR code in new window
-  window.open(qrCodeURL, '_blank', 'width=400,height=400');
-}
-
-function sendReminders() {
-  let today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Get the 10th of current month
-  let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-  tenthOfMonth.setHours(0, 0, 0, 0);
-  
-  // Only send reminders if today is on or after the 10th
-  if (today < tenthOfMonth) {
-    alert("Reminders can only be sent on or after the 10th of the month.");
-    return;
-  }
-  
-  let count = 0;
-  students.forEach(student => {
-    if (!student.paid) {
-      let lateFee = calculateSimpleLateFee(student.due, false);
-      if (lateFee > 0) {
-        let total = student.fee + lateFee;
-        sendReminderWithQR(student.phone, student.name, student.fee, lateFee, total);
-        count++;
-      }
-    }
-  });
-  
-  if (count === 0) {
-    alert('No overdue students found.');
-  } else {
-    alert(`Sent reminders to ${count} student(s).`);
-  }
-  
-  // Save settings when sending reminders
-  saveUPISettings();
-}
-
-function downloadReport() {
-  let csv = "Name,Phone,Course,Monthly Fee,Due Date,Status,Late Fee,Total,Receipt Number,Paid Date\n";
-  
-  students.forEach(student => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    
-    csv += `"${student.name}","${student.phone}","${student.course}","${student.fee}","${student.due}","${status}","${lateFee}","${total}","${student.receiptNumber || ''}","${student.paidDate || ''}"\n`;
-  });
-  
-  let blob = new Blob([csv], { type: 'text/csv' });
-  let url = window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  a.href = url;
-  a.download = 'student_fees_report.csv';
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
+// Search function
 function searchStudents() {
-  let searchInput = document.getElementById('searchInput');
-  currentSearchQuery = searchInput.value.toLowerCase().trim();
+  let searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    currentSearchQuery = searchInput.value.trim().toLowerCase();
+    render();
+  }
+}
+
+function sendReminder(phone, name, baseFee, lateFee, total){
+phone=cleanPhone(phone);
+let message=
+"Dear Parent,\n\n"+
+"This is a reminder that the fee for *" + name + "* is overdue.\n\n"+
+"Monthly Fee: ₹" + baseFee + "\n" +
+"Late Fee (after 10th): ₹" + lateFee + "\n" +
+"Total Due: ₹" + total + "\n\n"+
+"Please make payment immediately to avoid further penalties.\n\n"+
+"Srishti Centre for Performing Arts\n" +
+"Note: Late fee of ₹100 applies after the 10th of every month.";
+
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+window.open(url,'_blank');
+}
+
+function sendReceipt(phone,name,amount,receipt,date,lateFee){
+phone=cleanPhone(phone);
+let message=
+"Srishti Centre for Performing Arts\n\n"+
+"RECEIPT\n\n"+
+"Receipt No: " + receipt + "\n"+
+"Student: " + name + "\n"+
+"Monthly Fee: ₹" + (amount - lateFee) + "\n"+
+"Late Fee: ₹" + lateFee + "\n"+
+"Total Amount Paid: ₹" + amount + "\n"+
+"Date: " + date + "\n\n"+
+"Thank you for your payment.\n"+
+"Next month's fee is due by the 10th.";
+
+let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+window.open(url,'_blank');
+}
+
+async function loadStudents(){
+try {
+  students = [];
+  const querySnapshot = await getDocs(collection(db, "students"));
+  
+  querySnapshot.forEach((docSnap) => {
+    let data = docSnap.data();
+    data.id = docSnap.id;
+    students.push(data);
+  });
+  
+  // Reset search when loading new data
+  currentSearchQuery = "";
+  let searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.value = "";
+  }
+  
   render();
+} catch (error) {
+  console.error("Error loading students:", error);
+  alert("Error loading students. Please check console for details.");
+}
 }
 
-// Report Generation Functions
-
-function generateSimpleReport() {
-  let reportContainer = document.getElementById('reportContainer');
-  let reportSummary = document.getElementById('reportSummary');
+async function addStudent(){
+try {
+  // Validate inputs
+  let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  let course = document.getElementById("course").value.trim();
+  let fee = document.getElementById("fee").value;
+  let due = document.getElementById("due").value;
   
-  // Calculate statistics
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let overdueStudents = students.filter(s => {
-    if (s.paid) return false;
-    let lateFee = calculateSimpleLateFee(s.due, false);
-    return lateFee > 0;
-  }).length;
-  
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalPending = students.reduce((sum, s) => {
-    if (!s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, false);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalLateFees = students.reduce((sum, s) => {
-    return sum + calculateSimpleLateFee(s.due, s.paid);
-  }, 0);
-  
-  // Update summary cards
-  reportSummary.innerHTML = `
-    <div class="summary-card paid">
-      <h4>✅ Paid Students</h4>
-      <div class="number">${paidStudents}</div>
-      <div class="percentage">${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalCollected}</div>
-    </div>
-    <div class="summary-card pending">
-      <h4>⏳ Pending Students</h4>
-      <div class="number">${pendingStudents}</div>
-      <div class="percentage">${totalStudents ? ((pendingStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalPending}</div>
-    </div>
-    <div class="summary-card overdue">
-      <h4>⚠️ Overdue Students</h4>
-      <div class="number">${overdueStudents}</div>
-      <div class="percentage">${totalStudents ? ((overdueStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalLateFees} (Late Fees)</div>
-    </div>
-  `;
-  
-  // Generate simple report table
-  let reportHTML = `
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Student Name</th>
-          <th>Course</th>
-          <th>Monthly Fee</th>
-          <th>Status</th>
-          <th>Due Date</th>
-          <th>Late Fee</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-  
-  students.forEach((student, index) => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    let statusClass = status.toLowerCase();
-    
-    reportHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${student.name}</td>
-        <td>${student.course}</td>
-        <td>₹${student.fee}</td>
-        <td><span class="status-badge status-${statusClass}">${status}</span></td>
-        <td>${new Date(student.due).toLocaleDateString()}</td>
-        <td>₹${lateFee}</td>
-        <td><strong>₹${total}</strong></td>
-      </tr>
-    `;
-  });
-  
-  reportHTML += `
-      </tbody>
-    </table>
-  `;
-  
-  reportContainer.innerHTML = reportHTML;
-  
-  // Update report stats
-  document.getElementById('reportStats').innerHTML = `
-    <strong>Total Students: ${totalStudents}</strong> | 
-    Paid: ${paidStudents} | 
-    Pending: ${pendingStudents} | 
-    Overdue: ${overdueStudents} | 
-    Collection Rate: ${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}%
-  `;
-}
-
-function generateDetailedReport() {
-  let reportContainer = document.getElementById('reportContainer');
-  let reportSummary = document.getElementById('reportSummary');
-  
-  // Calculate statistics
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let overdueStudents = students.filter(s => {
-    if (s.paid) return false;
-    let lateFee = calculateSimpleLateFee(s.due, false);
-    return lateFee > 0;
-  }).length;
-  
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalPending = students.reduce((sum, s) => {
-    if (!s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, false);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalLateFees = students.reduce((sum, s) => {
-    return sum + calculateSimpleLateFee(s.due, s.paid);
-  }, 0);
-  
-  // Update summary cards with more details
-  reportSummary.innerHTML = `
-    <div class="summary-card paid">
-      <h4>✅ Paid Students</h4>
-      <div class="number">${paidStudents}</div>
-      <div class="percentage">${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">Collected: ₹${totalCollected}</div>
-      <div style="font-size:12px; margin-top:5px;">Avg: ₹${paidStudents ? Math.round(totalCollected/paidStudents) : 0}/student</div>
-    </div>
-    <div class="summary-card pending">
-      <h4>⏳ Pending Students</h4>
-      <div class="number">${pendingStudents}</div>
-      <div class="percentage">${totalStudents ? ((pendingStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">Expected: ₹${totalPending}</div>
-      <div style="font-size:12px; margin-top:5px;">Avg: ₹${pendingStudents ? Math.round(totalPending/pendingStudents) : 0}/student</div>
-    </div>
-    <div class="summary-card overdue">
-      <h4>⚠️ Overdue Students</h4>
-      <div class="number">${overdueStudents}</div>
-      <div class="percentage">${totalStudents ? ((overdueStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">Late Fees: ₹${totalLateFees}</div>
-      <div style="font-size:12px; margin-top:5px;">Avg Late Fee: ₹${overdueStudents ? Math.round(totalLateFees/overdueStudents) : 0}/student</div>
-    </div>
-  `;
-  
-  // Generate detailed report table
-  let reportHTML = `
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Student Name</th>
-          <th>Phone</th>
-          <th>Course</th>
-          <th>Monthly Fee</th>
-          <th>Due Date</th>
-          <th>Status</th>
-          <th>Late Fee</th>
-          <th>Total</th>
-          <th>Receipt No</th>
-          <th>Paid Date</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-  
-  students.forEach((student, index) => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    let statusClass = status.toLowerCase();
-    
-    reportHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${student.name}</td>
-        <td>${student.phone}</td>
-        <td>${student.course}</td>
-        <td>₹${student.fee}</td>
-        <td>${new Date(student.due).toLocaleDateString()}</td>
-        <td><span class="status-badge status-${statusClass}">${status}</span></td>
-        <td>₹${lateFee}</td>
-        <td><strong>₹${total}</strong></td>
-        <td>${student.receiptNumber || '-'}</td>
-        <td>${student.paidDate ? new Date(student.paidDate).toLocaleDateString() : '-'}</td>
-      </tr>
-    `;
-  });
-  
-  reportHTML += `
-      </tbody>
-    </table>
-  `;
-  
-  reportContainer.innerHTML = reportHTML;
-  
-  // Update report stats with more details
-  let collectionRate = totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0;
-  let pendingRate = totalStudents ? ((pendingStudents/totalStudents)*100).toFixed(1) : 0;
-  
-  document.getElementById('reportStats').innerHTML = `
-    <strong>Summary:</strong> 
-    Total: ${totalStudents} | 
-    Paid: ${paidStudents} (${collectionRate}%) | 
-    Pending: ${pendingStudents} (${pendingRate}%) | 
-    Overdue: ${overdueStudents} | 
-    Collected: ₹${totalCollected} | 
-    Pending: ₹${totalPending} | 
-    Late Fees: ₹${totalLateFees}
-  `;
-}
-
-function filterReport() {
-  let filterValue = document.getElementById('reportFilter').value;
-  let searchValue = document.getElementById('reportSearch').value.toLowerCase();
-  let sortValue = document.getElementById('reportSort').value;
-  
-  let filteredStudents = [...students];
-  
-  // Apply status filter
-  if (filterValue !== 'all') {
-    filteredStudents = filteredStudents.filter(s => {
-      let lateFee = calculateSimpleLateFee(s.due, s.paid);
-      let status = s.paid ? 'paid' : (lateFee > 0 ? 'overdue' : 'pending');
-      return status === filterValue;
-    });
-  }
-  
-  // Apply search filter
-  if (searchValue) {
-    filteredStudents = filteredStudents.filter(s => 
-      s.name.toLowerCase().includes(searchValue) ||
-      s.course.toLowerCase().includes(searchValue) ||
-      s.phone.includes(searchValue)
-    );
-  }
-  
-  // Apply sorting
-  filteredStudents.sort((a, b) => {
-    switch(sortValue) {
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'fee':
-        return b.fee - a.fee;
-      case 'due':
-        return new Date(a.due) - new Date(b.due);
-      case 'status':
-        let statusA = a.paid ? 1 : 0;
-        let statusB = b.paid ? 1 : 0;
-        return statusA - statusB;
-      default:
-        return 0;
-    }
-  });
-  
-  // Regenerate report with filtered students
-  let reportContainer = document.getElementById('reportContainer');
-  let reportHTML = `
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Student Name</th>
-          <th>Course</th>
-          <th>Monthly Fee</th>
-          <th>Status</th>
-          <th>Due Date</th>
-          <th>Late Fee</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-  
-  filteredStudents.forEach((student, index) => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    let statusClass = status.toLowerCase();
-    
-    reportHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${student.name}</td>
-        <td>${student.course}</td>
-        <td>₹${student.fee}</td>
-        <td><span class="status-badge status-${statusClass}">${status}</span></td>
-        <td>${new Date(student.due).toLocaleDateString()}</td>
-        <td>₹${lateFee}</td>
-        <td><strong>₹${total}</strong></td>
-      </tr>
-    `;
-  });
-  
-  reportHTML += `
-      </tbody>
-    </table>
-  `;
-  
-  reportContainer.innerHTML = reportHTML;
-  
-  // Update stats for filtered results
-  let totalFiltered = filteredStudents.length;
-  let paidFiltered = filteredStudents.filter(s => s.paid).length;
-  
-  document.getElementById('reportStats').innerHTML = `
-    <strong>Filtered Results:</strong> Showing ${totalFiltered} of ${students.length} students | 
-    Paid: ${paidFiltered} | 
-    Pending: ${totalFiltered - paidFiltered}
-  `;
-}
-
-function exportReportToExcel() {
-  let csv = "Name,Phone,Course,Monthly Fee,Due Date,Status,Late Fee,Total,Receipt Number,Paid Date\n";
-  
-  students.forEach(student => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    
-    csv += `"${student.name}","${student.phone}","${student.course}","${student.fee}","${student.due}","${status}","${lateFee}","${total}","${student.receiptNumber || ''}","${student.paidDate || ''}"\n`;
-  });
-  
-  // Add summary at the end
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  csv += `\n\nSUMMARY\n`;
-  csv += `Total Students,${totalStudents}\n`;
-  csv += `Paid Students,${paidStudents}\n`;
-  csv += `Pending Students,${pendingStudents}\n`;
-  csv += `Total Collected,${totalCollected}\n`;
-  
-  let blob = new Blob([csv], { type: 'text/csv' });
-  let url = window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  a.href = url;
-  a.download = `fee_report_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
-function copyReportToClipboard() {
-  let reportText = "SRISHTI CENTRE FEE REPORT\n";
-  reportText += "=".repeat(50) + "\n\n";
-  
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  reportText += `SUMMARY\n`;
-  reportText += `Total Students: ${totalStudents}\n`;
-  reportText += `Paid Students: ${paidStudents} (${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}%)\n`;
-  reportText += `Pending Students: ${pendingStudents} (${totalStudents ? ((pendingStudents/totalStudents)*100).toFixed(1) : 0}%)\n`;
-  reportText += `Total Collected: ₹${totalCollected}\n\n`;
-  
-  reportText += "DETAILED LIST\n";
-  reportText += "-".repeat(50) + "\n";
-  
-  students.forEach((student, index) => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'PAID' : (lateFee > 0 ? 'OVERDUE' : 'PENDING');
-    
-    reportText += `${index + 1}. ${student.name} (${student.course}) - ${status} - ₹${total}\n`;
-  });
-  
-  navigator.clipboard.writeText(reportText).then(() => {
-    alert('Report copied to clipboard!');
-  }).catch(() => {
-    alert('Failed to copy report. Please try again.');
-  });
-}
-
-function downloadReportPDF() {
-  // Create a printable version of the report
-  let printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Srishti Centre - Fee Report</title>
-        <style>
-          body { font-family: Arial; padding: 20px; }
-          h1 { color: #2d89ef; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th { background: #2d89ef; color: white; padding: 10px; text-align: left; }
-          td { padding: 8px; border-bottom: 1px solid #ddd; }
-          .summary { display: flex; gap: 20px; margin: 20px 0; }
-          .summary-box { flex: 1; padding: 15px; border-radius: 5px; color: white; }
-          .paid { background: #28a745; }
-          .pending { background: #ffc107; color: #333; }
-          .overdue { background: #e53935; }
-          .footer { margin-top: 30px; text-align: center; color: #666; }
-        </style>
-      </head>
-      <body>
-        <h1>Srishti Centre for Performing Arts</h1>
-        <h2>Fee Payment Report - ${new Date().toLocaleDateString()}</h2>
-        
-        <div class="summary">
-          <div class="summary-box paid">
-            <h3>Paid Students</h3>
-            <div style="font-size: 24px;">${students.filter(s => s.paid).length}</div>
-          </div>
-          <div class="summary-box pending">
-            <h3>Pending Students</h3>
-            <div style="font-size: 24px;">${students.filter(s => !s.paid).length}</div>
-          </div>
-          <div class="summary-box overdue">
-            <h3>Overdue Students</h3>
-            <div style="font-size: 24px;">${students.filter(s => {
-              if (s.paid) return false;
-              let lateFee = calculateSimpleLateFee(s.due, false);
-              return lateFee > 0;
-            }).length}</div>
-          </div>
-        </div>
-        
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Course</th>
-              <th>Monthly Fee</th>
-              <th>Status</th>
-              <th>Due Date</th>
-              <th>Late Fee</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-  `);
-  
-  students.forEach(student => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    
-    printWindow.document.write(`
-      <tr>
-        <td>${student.name}</td>
-        <td>${student.course}</td>
-        <td>₹${student.fee}</td>
-        <td>${status}</td>
-        <td>${new Date(student.due).toLocaleDateString()}</td>
-        <td>₹${lateFee}</td>
-        <td>₹${total}</td>
-      </tr>
-    `);
-  });
-  
-  printWindow.document.write(`
-          </tbody>
-        </table>
-        <div class="footer">
-          <p>Generated on ${new Date().toLocaleString()}</p>
-          <p>Srishti Centre for Performing Arts</p>
-        </div>
-      </body>
-    </html>
-  `);
-  
-  printWindow.document.close();
-  printWindow.print();
-}
-
-function printReport() {
-  downloadReportPDF(); // Reuse the PDF generation function
-}
-
-function render() {
-  let tbody = document.getElementById('table');
-  let mobileList = document.getElementById('mobileList');
-  
-  if (!tbody || !mobileList) return;
-  
-  tbody.innerHTML = '';
-  mobileList.innerHTML = '';
-  
-  let today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Get the 10th of current month
-  let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-  tenthOfMonth.setHours(0, 0, 0, 0);
-  let isAfterTenth = today >= tenthOfMonth;
-  
-  // Calculate dashboard totals
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let totalCollected = 0;
-  let totalPending = 0;
-  let totalOverdue = 0;
-  let totalLateFees = 0;
-  
-  students.forEach(student => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    
-    if (student.paid) {
-      totalCollected += total;
-    } else {
-      totalPending += total;
-      if (lateFee > 0) {
-        totalOverdue++;
-        totalLateFees += lateFee;
-      }
-    }
-  });
-  
-  // Update dashboard
-  document.getElementById('totalStudents').innerHTML = `Total: ${totalStudents}`;
-  document.getElementById('paidStudents').innerHTML = `Paid: ${paidStudents}`;
-  document.getElementById('pendingStudents').innerHTML = `Pending: ${pendingStudents}`;
-  document.getElementById('overdueStudents').innerHTML = `Overdue: ${totalOverdue}`;
-  document.getElementById('totalCollected').innerHTML = `Collected: ₹${totalCollected}`;
-  document.getElementById('totalPending').innerHTML = `Pending: ₹${totalPending}`;
-  document.getElementById('totalLateFees').innerHTML = `Late Fees: ₹${totalLateFees}`;
-  
-  // Filter students for display
-  let filteredStudents = students;
-  if (currentSearchQuery) {
-    filteredStudents = students.filter(student => 
-      student.name && student.name.toLowerCase().includes(currentSearchQuery)
-    );
-  }
-  
-  if (filteredStudents.length === 0 && currentSearchQuery) {
-    tbody.innerHTML = `<tr><td colspan="12" class="no-results">No students found matching "${currentSearchQuery}"</td></tr>`;
-    mobileList.innerHTML = `<div class="no-results">No students found matching "${currentSearchQuery}"</div>`;
+  if (!name || !phone || !course || !fee || !due) {
+    alert("Please fill in all fields");
     return;
   }
   
-  // Render table rows
-  filteredStudents.forEach(student => {
-    let lateFee = calculateSimpleLateFee(student.due, student.paid);
-    let total = student.fee + lateFee;
-    let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    
-    // Format date
-    let dueDate = new Date(student.due);
-    let formattedDueDate = dueDate.toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-    
-    // Escape for HTML attributes
-    let safeName = (student.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-    let safePhone = (student.phone || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-    
-    // Generate buttons
-    let reminderBtn = student.paid 
-      ? '<span class="disabled-btn">Paid</span>'
-      : (isAfterTenth
-        ? `<button onclick="sendReminderWithQR('${safePhone}', '${safeName}', ${student.fee}, ${lateFee}, ${total})">📱 Send Reminder</button>`
-        : '<span class="disabled-btn">Reminder (after 10th)</span>');
-    
-    let receiptBtn = student.paid
-      ? `<button onclick="sendReceipt('${safePhone}', '${safeName}', ${total}, '${student.receiptNumber || ''}', '${student.paidDate || ''}', ${lateFee})">📱 Resend Receipt</button>`
-      : '';
-    
-    // Table row
-    tbody.innerHTML += `
-      <tr>
-        <td>${student.name} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
-        <td>${student.phone}</td>
-        <td>${student.course}</td>
-        <td>₹${student.fee}</td>
-        <td>₹${lateFee}</td>
-        <td><strong>₹${total}</strong></td>
-        <td class="${lateFee > 0 ? 'overdue' : (student.paid ? 'paid' : '')}">${status}</td>
-        <td>${formattedDueDate}</td>
-        <td>
-          <button onclick="editStudent('${student.id}')">✏️ Edit</button>
-          <button onclick="markPaid('${student.id}')">✅ Paid</button>
-          <button onclick="deleteStudent('${student.id}')">🗑️ Delete</button>
-        </td>
-        <td>${reminderBtn}</td>
-        <td><button onclick="paymentQR('${safeName}', ${total})">📱 QR Pay</button></td>
-        <td>${receiptBtn}</td>
-      </tr>
-    `;
-    
-    // Mobile card
-    mobileList.innerHTML += `
-      <div class="mobile-card">
-        <h3>${student.name} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee</span>' : ''}</h3>
-        <strong>Course:</strong> ${student.course}<br>
-        <strong>Phone:</strong> ${student.phone}<br>
-        <strong>Monthly Fee:</strong> ₹${student.fee}<br>
-        <strong>Late Fee:</strong> ₹${lateFee}<br>
-        <strong>Total Due:</strong> ₹${total}<br>
-        <strong>Status:</strong> <span class="${lateFee > 0 ? 'overdue' : (student.paid ? 'paid' : '')}">${status}</span><br>
-        <strong>Due Date:</strong> ${formattedDueDate}<br>
-        ${lateFee > 0 ? '<div class="late-fee-info">⚠️ Late fee of ₹100 applied</div>' : ''}
-        <br>
-        <button onclick="editStudent('${student.id}')">✏️ Edit</button>
-        <button onclick="markPaid('${student.id}')">✅ Mark Paid</button>
-        <button onclick="deleteStudent('${student.id}')">🗑️ Delete</button>
-        <br><br>
-        ${reminderBtn}
-        <button onclick="paymentQR('${safeName}', ${total})">📱 QR Pay</button>
-        ${receiptBtn}
-      </div>
-    `;
+  let student = {
+    name: name,
+    phone: cleanPhone(phone),
+    course: course,
+    fee: parseInt(fee),
+    due: due,
+    paid: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  await addDoc(collection(db, "students"), student);
+  
+  // Clear inputs
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("course").value = "";
+  document.getElementById("fee").value = "";
+  document.getElementById("due").value = "2026-03-10";
+  
+  await loadStudents();
+  alert("Student added successfully!");
+  
+} catch (error) {
+  console.error("Error adding student:", error);
+  alert("Error adding student. Please try again.");
+}
+}
+
+async function markPaid(id){
+try {
+  // Find the student to get their fee and late fee
+  let student = students.find(s => s.id == id);
+  if (!student) return;
+  
+  let lateFee = calculateLateFee(student.due, false);
+  let total = parseInt(student.fee) + lateFee;
+  
+  let receipt = "RCPT-" + Date.now();
+  let date = new Date().toISOString().slice(0,10);
+  
+  await updateDoc(doc(db, "students", id), {
+    paid: true,
+    receiptNumber: receipt,
+    paidDate: date,
+    lateFeePaid: lateFee,
+    totalPaid: total
   });
+  
+  alert("Payment recorded. Receipt No: " + receipt + "\nAmount: ₹" + total + " (Includes late fee: ₹" + lateFee + ")");
+  await loadStudents();
+  
+} catch (error) {
+  console.error("Error marking as paid:", error);
+  alert("Error recording payment. Please try again.");
+}
+}
+
+async function deleteStudent(id){
+if(!confirm("Delete this student?")) return;
+
+try {
+  await deleteDoc(doc(db, "students", id));
+  await loadStudents();
+  alert("Student deleted successfully!");
+} catch (error) {
+  console.error("Error deleting student:", error);
+  alert("Error deleting student. Please try again.");
+}
+}
+
+async function editStudent(id){
+try {
+  let s = students.find(x => x.id == id);
+  if (!s) return;
+  
+  let newPhone = prompt("Edit phone (with country code)", s.phone);
+  if (newPhone === null) return;
+  
+  let newFee = prompt("Edit monthly fee amount", s.fee);
+  if (newFee === null) return;
+  
+  await updateDoc(doc(db, "students", id), {
+    phone: cleanPhone(newPhone),
+    fee: parseInt(newFee)
+  });
+  
+  await loadStudents();
+  alert("Student updated successfully!");
+  
+} catch (error) {
+  console.error("Error editing student:", error);
+  alert("Error updating student. Please try again.");
+}
+}
+
+function sendReminders(){
+let count = 0;
+let today = new Date();
+today.setHours(0,0,0,0);
+
+// Get the 10th of current month
+let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+tenthOfMonth.setHours(0,0,0,0);
+
+// Only send reminders if today is on or after the 10th
+if (today < tenthOfMonth) {
+  alert("Reminders can only be sent on or after the 10th of the month.");
+  return;
+}
+
+students.forEach((s)=>{
+  if (!s.paid) {
+    let lateFee = calculateLateFee(s.due, false);
+    if (lateFee > 0) {
+      let total = parseInt(s.fee) + lateFee;
+      sendReminder(s.phone, s.name, s.fee, lateFee, total);
+      count++;
+    }
+  }
+});
+
+if(count===0) alert("No overdue students found for this month.");
+}
+
+function downloadReport(){
+let csv = "Name,Phone,Course,Monthly Fee,Due Date,Status,Late Fee,Total,Receipt Number,Paid Date\n";
+
+students.forEach(s=>{
+  let lateFee = calculateLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
+  let status = s.paid ? "Paid" : (lateFee > 0 ? "Overdue" : "Pending");
+  
+  csv += `"${s.name}","${s.phone}","${s.course}","${s.fee}","${s.due}","${status}","${lateFee}","${total}","${s.receiptNumber || ''}","${s.paidDate || ''}"\n`;
+});
+
+let blob = new Blob([csv], { type: 'text/csv' });
+let url = URL.createObjectURL(blob);
+
+let a = document.createElement("a");
+a.href = url;
+a.download = "student_fees_report.csv";
+a.click();
+
+URL.revokeObjectURL(url);
+}
+
+function render(){
+let tbody = document.getElementById("table");
+let mobile = document.getElementById("mobileList");
+
+if (!tbody || !mobile) return;
+
+tbody.innerHTML = "";
+mobile.innerHTML = "";
+
+let overdueCount = 0;
+let collected = 0;
+let pending = 0;
+let today = new Date();
+today.setHours(0,0,0,0);
+
+// Get the 10th of current month for display
+let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+tenthOfMonth.setHours(0,0,0,0);
+let isAfterTenth = today >= tenthOfMonth;
+
+// Filter students based on search query
+let filtered = students;
+if (currentSearchQuery) {
+  filtered = students.filter(s => 
+    s.name && s.name.toLowerCase().includes(currentSearchQuery)
+  );
+}
+
+// Dashboard calculations using ALL students (not filtered)
+students.forEach(s => {
+  let lateFee = calculateLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
+  
+  if (s.paid) {
+    collected += total;
+  } else {
+    pending += total;
+    if (lateFee > 0) {
+      overdueCount++;
+    }
+  }
+});
+
+// Update dashboard
+document.getElementById("students").innerHTML = "Students: " + students.length;
+document.getElementById("collected").innerHTML = "Collected: ₹" + collected;
+document.getElementById("pending").innerHTML = "Pending: ₹" + pending;
+document.getElementById("overdue").innerHTML = "Overdue: " + overdueCount;
+
+// Show no results message if needed
+if (filtered.length === 0 && currentSearchQuery) {
+  let noResultsMsg = `<tr><td colspan="10" class="no-results">No student found matching "${currentSearchQuery}"</td></tr>`;
+  tbody.innerHTML = noResultsMsg;
+  mobile.innerHTML = `<div class="no-results">No student found matching "${currentSearchQuery}"</div>`;
+  return;
+}
+
+// Render filtered students
+filtered.forEach(s => {
+  let lateFee = calculateLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
+  let status = "Pending";
+  
+  if (s.paid) {
+    status = "Paid";
+  } else if (lateFee > 0) {
+    status = "Overdue";
+  }
+  
+  // Format due date for display
+  let dueDate = new Date(s.due);
+  let formattedDueDate = dueDate.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  // Escape special characters for HTML attributes
+  let safePhone = (s.phone || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  let safeName = (s.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+  
+  // Reminder button - only show if after 10th and not paid
+  let reminder = s.paid
+    ? '<span class="disabled-btn">Paid</span>'
+    : (isAfterTenth 
+        ? `<button onclick="sendReminder('${safePhone}','${safeName}','${s.fee}','${lateFee}','${total}')">📱 Send Reminder</button>`
+        : '<span class="disabled-btn">Reminder (after 10th)</span>');
+  
+  // Receipt button for paid students
+  let receiptBtn = s.paid
+    ? `<button onclick="sendReceipt('${safePhone}','${safeName}','${total}','${s.receiptNumber || 'N/A'}','${s.paidDate || ''}','${lateFee}')">📱 Receipt</button>`
+    : "";
+  
+  // Table row
+  tbody.innerHTML += `
+<tr>
+  <td>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
+  <td>${s.phone || ''}</td>
+  <td>${s.course || ''}</td>
+  <td>₹${s.fee || 0}</td>
+  <td>₹${lateFee}</td>
+  <td><strong>₹${total}</strong></td>
+  <td class="${lateFee > 0 ? 'overdue' : (s.paid ? 'paid' : '')}">${status}</td>
+  <td>${formattedDueDate}</td>
+  <td>
+    <button onclick="editStudent('${s.id}')">✏️ Edit</button>
+    <button onclick="markPaid('${s.id}')">✅ Paid</button>
+    <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
+    ${receiptBtn}
+  </td>
+  <td>${reminder}</td>
+</tr>
+`;
+  
+  // Mobile card
+  mobile.innerHTML += `
+<div class="mobile-card">
+  <h3>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee</span>' : ''}</h3>
+  <strong>Course:</strong> ${s.course || ''}<br>
+  <strong>Phone:</strong> ${s.phone || ''}<br>
+  <strong>Monthly Fee:</strong> ₹${s.fee || 0}<br>
+  <strong>Late Fee:</strong> ₹${lateFee}<br>
+  <strong>Total Due:</strong> ₹${total}<br>
+  <strong>Status:</strong> <span class="${lateFee > 0 ? 'overdue' : (s.paid ? 'paid' : '')}">${status}</span><br>
+  <strong>Due Date:</strong> ${formattedDueDate}<br>
+  ${lateFee > 0 ? '<div class="late-fee-info">⚠️ Late fee of ₹100 applied (after 10th of month)</div>' : ''}
+  <br>
+  
+  <button onclick="editStudent('${s.id}')">✏️ Edit</button>
+  <button onclick="markPaid('${s.id}')">✅ Mark Paid</button>
+  <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
+  ${receiptBtn}
+  <br><br>
+  ${reminder}
+</div>
+`;
+});
 }
 
 // Make functions globally available
@@ -1657,21 +765,12 @@ window.addStudent = addStudent;
 window.markPaid = markPaid;
 window.deleteStudent = deleteStudent;
 window.editStudent = editStudent;
-window.paymentQR = paymentQR;
 window.sendReminder = sendReminder;
-window.sendReminderWithQR = sendReminderWithQR;
 window.sendReminders = sendReminders;
 window.sendReceipt = sendReceipt;
 window.downloadReport = downloadReport;
 window.searchStudents = searchStudents;
 window.logout = logout;
-window.generateSimpleReport = generateSimpleReport;
-window.generateDetailedReport = generateDetailedReport;
-window.filterReport = filterReport;
-window.exportReportToExcel = exportReportToExcel;
-window.copyReportToClipboard = copyReportToClipboard;
-window.downloadReportPDF = downloadReportPDF;
-window.printReport = printReport;
 
 </script>
 
