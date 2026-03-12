@@ -11,20 +11,8 @@
 
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
 
-/* HEADER */
-
-.header{
-text-align:center;
-margin-bottom:20px
-}
-
-.header img{
-height:80px;
-display:block;
-margin:auto
-}
-
-/* CONTAINER */
+.header{text-align:center;margin-bottom:20px}
+.header img{height:80px;margin:auto;display:block}
 
 .container{
 max-width:1000px;
@@ -50,18 +38,11 @@ border:none;
 cursor:pointer
 }
 
-button:hover{
-background:#1b5fbf
-}
+button:hover{background:#1b5fbf}
 
-.reminder-btn{
-background:#e53935
-}
+.reminder-btn{background:#e53935}
 
-.overdue{
-color:#e53935;
-font-weight:bold
-}
+.overdue{color:#e53935;font-weight:bold}
 
 .disabled-btn{
 background:#ccc;
@@ -85,20 +66,13 @@ padding:15px;
 border-radius:8px
 }
 
-/* TABLE */
-
 table{
 width:100%;
 border-collapse:collapse;
 margin-top:20px
 }
 
-th,td{
-padding:8px;
-border-bottom:1px solid #ddd
-}
-
-/* WHATSAPP */
+th,td{padding:8px;border-bottom:1px solid #ddd}
 
 .whatsapp{
 background:#25D366;
@@ -107,8 +81,6 @@ border-radius:5px;
 color:white;
 text-decoration:none
 }
-
-/* MOBILE CARD */
 
 .mobile-card{
 background:#f8f8f8;
@@ -202,6 +174,32 @@ const db=getFirestore(app);
 
 let students=[];
 
+/* CLEAN PHONE NUMBER */
+
+function cleanPhone(phone){
+
+phone = phone.replace(/\D/g,'');
+
+if(!phone.startsWith("91")){
+phone = "91"+phone;
+}
+
+return phone;
+
+}
+
+/* WHATSAPP LINK */
+
+function reminderLink(phone,name,total){
+
+phone = cleanPhone(phone);
+
+let message = "Hello, fee for "+name+" is ₹"+total+". Please make payment.";
+
+return "https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+
+}
+
 async function loadStudents(){
 
 students=[];
@@ -224,7 +222,7 @@ async function addStudent(){
 
 let student={
 name:name.value,
-phone:phone.value,
+phone:cleanPhone(phone.value),
 course:course.value,
 fee:fee.value,
 due:due.value,
@@ -259,7 +257,7 @@ let newFee=prompt("Edit Fee",s.fee);
 const ref=doc(db,"students",id);
 
 await updateDoc(ref,{
-phone:newPhone,
+phone:cleanPhone(newPhone),
 fee:newFee
 });
 
@@ -278,16 +276,6 @@ let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
 let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
 
 window.open(qr);
-
-}
-
-/* REMINDER */
-
-function reminderLink(phone,name,total){
-
-return `https://wa.me/${phone}?text=${encodeURIComponent(
-"Hello, fee for "+name+" is ₹"+total+". Please make payment."
-)}`;
 
 }
 
@@ -390,8 +378,6 @@ let row=`
 `;
 
 tbody.innerHTML+=row;
-
-/* MOBILE */
 
 mobile.innerHTML+=`
 <div class="mobile-card">
