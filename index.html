@@ -1,852 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Srishti Centre Fee Manager</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>classy edge · refined card</title>
+  <!-- system fonts with graceful fallbacks — timeless & smartphone‑friendly -->
+  <style>
+    /* reset & base — pure understatement */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<link rel="manifest" href="manifest.json">
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #f6f3f0 0%, #e8e2da 100%);
+      /* woven texture – subtle linen feel */
+      background-image: 
+        radial-gradient(circle at 25% 30%, rgba(200, 180, 160, 0.03) 0%, transparent 28%),
+        repeating-linear-gradient(45deg, rgba(180, 160, 140, 0.02) 0px, rgba(180, 160, 140, 0.02) 2px, transparent 2px, transparent 8px);
+      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
 
-<style>
+    /* main card — calm, airy, timeless proportions */
+    .card {
+      max-width: 400px;  /* perfect for mobile thumb zone */
+      width: 100%;
+      background: rgba(255, 251, 245, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: #fefcf7;  /* warm white base */
+      border-radius: 32px;
+      box-shadow: 
+        0 20px 35px -10px rgba(80, 60, 40, 0.2),
+        0 2px 8px rgba(0, 0, 0, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      padding: 2rem 1.8rem;
+      border: 1px solid rgba(220, 200, 180, 0.5);
+      transition: all 0.2s ease;
+    }
 
-body{
-font-family:Arial;
-background:#eef2f7;
-margin:0;
-padding:20px;
-}
+    /* elegant serif hierarchy — smartphone legibility with class */
+    .pretitle {
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+      font-weight: 400;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #a28e7a;
+      margin-bottom: 0.5rem;
+      padding-left: 0.2rem;
+    }
 
-.header{
-background:#2d89ef;
-border-radius:10px;
-padding:15px 20px;
-margin-bottom:20px;
-color:white;
-}
+    h1 {
+      font-family: 'Cormorant Garamond', 'Georgia', serif;
+      font-weight: 500;
+      font-size: 2.4rem;
+      line-height: 1.1;
+      color: #2e251e;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid #c7ad92;
+      padding-left: 1rem;
+      font-style: normal;
+      letter-spacing: -0.01em;
+    }
 
-.logo-row{
-display:flex;
-align-items:center;
-gap:15px;
-flex:1;
-}
+    .subhead {
+      font-family: 'Cormorant Garamond', 'Georgia', serif;
+      font-weight: 400;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: #6b5a4b;
+      margin-bottom: 1.75rem;
+      padding-left: 1.3rem;
+      letter-spacing: 0.02em;
+    }
 
-.header-row{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-}
+    .description {
+      font-family: 'Lora', 'Palatino', serif;
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #3f332b;
+      margin-bottom: 2rem;
+      padding: 0 0.2rem;
+      border-bottom: 1px dashed #dccfc4;
+      padding-bottom: 1.5rem;
+    }
 
-.logout-btn{
-background:rgba(255,255,255,0.2);
-color:white;
-border:1px solid rgba(255,255,255,0.5);
-padding:8px 16px;
-border-radius:6px;
-cursor:pointer;
-font-size:13px;
-white-space:nowrap;
-width:auto;
-margin:0;
-}
+    /* refined detail grid */
+    .details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 1.2rem;
+      margin-bottom: 2.2rem;
+      justify-content: space-between;
+    }
 
-.logout-btn:hover{
-background:rgba(255,255,255,0.35);
-}
+    .detail-item {
+      flex: 1 1 100px;
+    }
 
-.user-info{
-font-size:12px;
-opacity:0.85;
-text-align:right;
-}
+    .detail-label {
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+      font-weight: 400;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #b7a187;
+      margin-bottom: 0.2rem;
+    }
 
-/* Hide entire page until auth check completes */
-.page-hidden{
-display:none;
-}
+    .detail-value {
+      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+      color: #2f2a24;
+      border-bottom: 1px dotted #d6cbbc;
+      padding-bottom: 0.2rem;
+    }
 
-.logo-row img{
-height:70px;
-}
+    /* signature quote — extra classy */
+    .quote {
+      font-family: 'Lora', 'Palatino', serif;
+      font-size: 0.95rem;
+      font-style: italic;
+      color: #6a5b4e;
+      background: rgba(220, 205, 185, 0.2);
+      padding: 1rem 1.2rem;
+      border-radius: 60px 16px 60px 16px;
+      margin-bottom: 1.8rem;
+      border: 1px solid #e6d9cd;
+      box-shadow: inset 0 1px 4px rgba(255, 250, 240, 0.8);
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
 
-.title-block h1{
-margin:0;
-font-size:22px;
-}
+    .quote i {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 1.8rem;
+      color: #aa8f76;
+      vertical-align: middle;
+      margin-right: 0.2rem;
+    }
 
-.title-block h2{
-margin:0;
-font-size:15px;
-opacity:0.9;
-}
+    /* elegant button — barely there, yet soft */
+    .button {
+      font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+      font-weight: 400;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #5b4d3e;
+      background: transparent;
+      border: 1.5px solid #cfbca9;
+      padding: 0.9rem 1.8rem;
+      border-radius: 48px;
+      width: fit-content;
+      margin: 0 auto 0.5rem;
+      transition: all 0.25s;
+      backdrop-filter: blur(4px);
+      background: rgba(255, 250, 240, 0.3);
+      box-shadow: 0 4px 12px rgba(140, 110, 80, 0.05);
+      cursor: default;  /* just for style, not interactive demo */
+    }
 
-.container{
-max-width:1000px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 3px 12px rgba(0,0,0,0.15);
-}
+    .button:hover {
+      background: #e6d7c8;
+      color: #2f2a24;
+      border-color: #b2947a;
+    }
 
-input,button{
-padding:10px;
-margin:5px 0;
-width:100%;
-border-radius:6px;
-border:1px solid #ccc;
-box-sizing: border-box;
-}
+    /* fine print – discrete elegance */
+    .footnote {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #c6b3a1;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
 
-button{
-background:#2d89ef;
-color:white;
-border:none;
-cursor:pointer;
-}
+    /* smartphone font tuning */
+    @media (max-width: 420px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .subhead {
+        font-size: 1rem;
+      }
+      .card {
+        padding: 1.8rem 1.2rem;
+      }
+      .detail-value {
+        font-size: 1.3rem;
+      }
+    }
 
-button:hover{
-background:#1b5fbf;
-}
-
-.reminder-btn{
-background:#e53935;
-}
-
-.overdue{
-color:#e53935;
-font-weight:bold;
-}
-
-.paid{
-color:#28a745;
-font-weight:bold;
-}
-
-.disabled-btn{
-background:#ccc;
-color:#666;
-padding:6px 10px;
-border-radius:5px;
-display: inline-block;
-width: auto;
-}
-
-.dashboard{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-flex-wrap:wrap;
-}
-
-.card{
-flex:1;
-background:#2d89ef;
-color:white;
-padding:15px;
-border-radius:8px;
-text-align:center;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-}
-
-th,td{
-padding:8px;
-border-bottom:1px solid #ddd;
-text-align: left;
-}
-
-.mobile-card{
-background:#f8f8f8;
-border-radius:10px;
-padding:12px;
-margin-bottom:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.mobile-list{
-display:none;
-}
-
-/* Search bar styles */
-.search-wrapper{
-position:relative;
-margin-bottom:15px;
-}
-
-.search-wrapper input{
-padding-left:38px;
-border:2px solid #2d89ef;
-font-size:15px;
-margin:0;
-}
-
-.search-wrapper input:focus{
-outline:none;
-border-color:#1b5fbf;
-box-shadow:0 0 0 3px rgba(45,137,239,0.15);
-}
-
-.search-icon{
-position:absolute;
-left:11px;
-top:50%;
-transform:translateY(-50%);
-color:#2d89ef;
-font-size:16px;
-pointer-events:none;
-}
-
-.no-results{
-text-align:center;
-color:#999;
-padding:20px;
-font-style:italic;
-}
-
-.late-fee-badge{
-background: #ff9800;
-color: white;
-padding: 3px 8px;
-border-radius: 12px;
-font-size: 12px;
-font-weight: bold;
-margin-left: 5px;
-}
-
-.late-fee-info{
-font-size: 12px;
-color: #e53935;
-margin-top: 5px;
-}
-
-@media(max-width:700px){
-
-table{display:none}
-.mobile-list{display:block}
-
-.logo-row{
-flex-direction:column;
-text-align:center;
-}
-
-}
-
-.footer{
-text-align:center;
-margin-top:20px;
-font-size:13px;
-color:#666;
-}
-
-</style>
+    /* import the real classy fonts – clean, fast, mobile friendly */
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lora:ital@0;1&family=Montserrat:wght@300;400;500&display=swap');
+    /* fallbacks: Georgia, Palatino, Helvetica — all superb on smartphones */
+  </style>
 </head>
-
 <body>
+  <div class="card">
+    <!-- everything composed for a classy, serene reading on small screen -->
+    <div class="pretitle">maison · établi</div>
+    <h1>LUMIÈRE<br>NOIR</h1>
+    <div class="subhead">timeless edit — autumn 2025</div>
 
-<div class="container" style="display:none">
+    <div class="description">
+      A restrained palette of deep ink and warm parchment. Crafted for those who appreciate the quiet texture of well‑chosen letters and the poetry of space.
+    </div>
 
-<div class="header">
+    <!-- refined information grouping -->
+    <div class="details">
+      <div class="detail-item">
+        <div class="detail-label">design</div>
+        <div class="detail-value">S · R</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">edition</div>
+        <div class="detail-value">XII</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">paper</div>
+        <div class="detail-value">avril</div>
+      </div>
+    </div>
 
-<div class="header-row">
+    <!-- quote with an elegant opening mark -->
+    <div class="quote">
+      <i>“</i> Le détail n’est pas le petit, c’est le précis <i>”</i>
+    </div>
 
-<div class="logo-row">
-<img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-<div class="title-block">
-<h1>Srishti Centre for Performing Arts</h1>
-<h2>Student Fee Manager</h2>
-<p style="font-size: 14px; margin: 5px 0 0 0;">Late Fee: ₹100 after 10th of every month</p>
-</div>
-</div>
-
-<div style="text-align:right">
-<div class="user-info" id="userEmail"></div>
-<button class="logout-btn" onclick="logout()">Sign Out</button>
-</div>
-
-</div>
-
-</div>
-
-<div class="dashboard">
-<div class="card" id="students">Students: 0</div>
-<div class="card" id="collected">Collected: ₹0</div>
-<div class="card" id="pending">Pending: ₹0</div>
-<div class="card" id="overdue">Overdue: 0</div>
-</div>
-
-<button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
-📩 Send Fine Notice to All Overdue Students (After 10th of Month)
-</button>
-
-<!-- Search Bar -->
-<div class="search-wrapper">
-<span class="search-icon">🔍</span>
-<input id="searchInput" type="text" placeholder="Search student by name..." onkeyup="searchStudents()" oninput="searchStudents()">
-</div>
-
-<input id="name" placeholder="Student Name">
-<input id="phone" placeholder="Parent Phone (10 digits)">
-<input id="course" placeholder="Course">
-<input id="fee" type="number" placeholder="Monthly Fee">
-<input id="due" type="date" value="2026-03-10">
-
-<button onclick="addStudent()">Add Student</button>
-<button onclick="downloadReport()">Download Excel</button>
-
-<table>
-
-<thead>
-<tr>
-<th>Name</th>
-<th>Phone</th>
-<th>Course</th>
-<th>Monthly Fee</th>
-<th>Late Fee</th>
-<th>Total</th>
-<th>Status</th>
-<th>Due Date</th>
-<th>Actions</th>
-<th>Reminder</th>
-</tr>
-</thead>
-
-<tbody id="table"></tbody>
-
-</table>
-
-<div id="mobileList" class="mobile-list"></div>
-
-<div class="footer">
-© Srishti Centre for Performing Arts
-</div>
-
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-const firebaseConfig={
-apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
-authDomain:"student-fee-manager-98c51.firebaseapp.com",
-projectId:"student-fee-manager-98c51",
-storageBucket:"student-fee-manager-98c51.firebasestorage.app",
-messagingSenderId:"463103595080",
-appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
-};
-
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const auth=getAuth(app);
-
-// Global variables
-let students = [];
-let currentSearchQuery = "";
-
-// Constants
-const LATE_FEE_AMOUNT = 100;
-const LATE_FEE_DAY = 10; // 10th of every month
-
-// Auth guard – redirect to login if not signed in
-onAuthStateChanged(auth,(user)=>{
-  if(!user){
-    window.location.href="login.html";
-  } else {
-    document.getElementById("userEmail").textContent=user.email;
-    document.querySelector(".container").style.display="block";
-    loadStudents();
-  }
-});
-
-async function logout(){
-  await signOut(auth);
-  window.location.href="login.html";
-}
-
-// Fixed phone cleaning function
-function cleanPhone(phone){
-  // Remove all non-numeric characters
-  phone = phone.replace(/\D/g, '');
-  
-  // If it's a 10-digit number, add 91 prefix
-  if (phone.length === 10) {
-    phone = '91' + phone;
-  }
-  // If it starts with 0, remove the 0 and add 91
-  else if (phone.length === 11 && phone.startsWith('0')) {
-    phone = '91' + phone.substring(1);
-  }
-  // If it's longer than 10 but doesn't start with 91, take last 10 digits and add 91
-  else if (phone.length > 10 && !phone.startsWith('91')) {
-    phone = '91' + phone.slice(-10);
-  }
-  
-  return phone;
-}
-
-// Calculate late fee - if today is after the 10th and not paid, add late fee
-function calculateLateFee(dueDate, isPaid) {
-  if (isPaid) return 0;
-  
-  let today = new Date();
-  today.setHours(0,0,0,0);
-  
-  // Get the 10th of current month
-  let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-  tenthOfMonth.setHours(0,0,0,0);
-  
-  // If today is on or after the 10th of current month
-  if (today >= tenthOfMonth) {
-    return LATE_FEE_AMOUNT;
-  }
-  
-  return 0;
-}
-
-// Search function
-function searchStudents() {
-  let searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    currentSearchQuery = searchInput.value.trim().toLowerCase();
-    render();
-  }
-}
-
-// FIXED: Send reminder with proper WhatsApp URL formatting
-function sendReminder(phone, name, baseFee, lateFee, total){
-  // Clean and validate phone number
-  phone = cleanPhone(phone);
-  
-  // Ensure phone has country code (should be 91xxxx... after cleanPhone)
-  if (!phone || phone.length < 12) {
-    alert("Invalid phone number. Please check and try again.");
-    return;
-  }
-  
-  // Create message without special characters that might break the URL
-  let message = "Dear Parent,\n\n";
-  message += "REMINDER: Fee Payment Due\n\n";
-  message += "Student: " + name + "\n";
-  message += "Monthly Fee: ₹" + baseFee + "\n";
-  message += "Late Fee (after 10th): ₹" + lateFee + "\n";
-  message += "TOTAL DUE: ₹" + total + "\n\n";
-  message += "Please make payment immediately to avoid further penalties.\n\n";
-  message += "Srishti Centre for Performing Arts";
-  
-  // Use https://wa.me/ format which is more reliable
-  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  
-  // Open in new window
-  window.open(url, '_blank');
-}
-
-// FIXED: Send receipt with proper WhatsApp URL formatting
-function sendReceipt(phone, name, amount, receipt, date, lateFee){
-  // Clean and validate phone number
-  phone = cleanPhone(phone);
-  
-  if (!phone || phone.length < 12) {
-    alert("Invalid phone number. Please check and try again.");
-    return;
-  }
-  
-  let message = "Srishti Centre for Performing Arts\n\n";
-  message += "PAYMENT RECEIPT\n\n";
-  message += "Receipt No: " + receipt + "\n";
-  message += "Student: " + name + "\n";
-  message += "Monthly Fee: ₹" + (amount - lateFee) + "\n";
-  message += "Late Fee: ₹" + lateFee + "\n";
-  message += "Total Amount Paid: ₹" + amount + "\n";
-  message += "Date: " + date + "\n\n";
-  message += "Thank you for your payment.\n";
-  message += "Next month's fee is due by the 10th.";
-  
-  // Use https://wa.me/ format which is more reliable
-  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  
-  window.open(url, '_blank');
-}
-
-async function loadStudents(){
-try {
-  students = [];
-  const querySnapshot = await getDocs(collection(db, "students"));
-  
-  querySnapshot.forEach((docSnap) => {
-    let data = docSnap.data();
-    data.id = docSnap.id;
-    students.push(data);
-  });
-  
-  // Reset search when loading new data
-  currentSearchQuery = "";
-  let searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.value = "";
-  }
-  
-  render();
-} catch (error) {
-  console.error("Error loading students:", error);
-  alert("Error loading students. Please check console for details.");
-}
-}
-
-async function addStudent(){
-try {
-  // Validate inputs
-  let name = document.getElementById("name").value.trim();
-  let phone = document.getElementById("phone").value.trim();
-  let course = document.getElementById("course").value.trim();
-  let fee = document.getElementById("fee").value;
-  let due = document.getElementById("due").value;
-  
-  if (!name || !phone || !course || !fee || !due) {
-    alert("Please fill in all fields");
-    return;
-  }
-  
-  // Validate phone number (should be 10 digits)
-  let digitsOnly = phone.replace(/\D/g, '');
-  if (digitsOnly.length !== 10) {
-    alert("Please enter a valid 10-digit phone number");
-    return;
-  }
-  
-  let student = {
-    name: name,
-    phone: cleanPhone(phone),
-    course: course,
-    fee: parseInt(fee),
-    due: due,
-    paid: false,
-    createdAt: new Date().toISOString()
-  };
-  
-  await addDoc(collection(db, "students"), student);
-  
-  // Clear inputs
-  document.getElementById("name").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("course").value = "";
-  document.getElementById("fee").value = "";
-  document.getElementById("due").value = "2026-03-10";
-  
-  await loadStudents();
-  alert("Student added successfully!");
-  
-} catch (error) {
-  console.error("Error adding student:", error);
-  alert("Error adding student. Please try again.");
-}
-}
-
-async function markPaid(id){
-try {
-  // Find the student to get their fee and late fee
-  let student = students.find(s => s.id == id);
-  if (!student) return;
-  
-  let lateFee = calculateLateFee(student.due, false);
-  let total = parseInt(student.fee) + lateFee;
-  
-  let receipt = "RCPT-" + Date.now();
-  let date = new Date().toISOString().slice(0,10);
-  
-  await updateDoc(doc(db, "students", id), {
-    paid: true,
-    receiptNumber: receipt,
-    paidDate: date,
-    lateFeePaid: lateFee,
-    totalPaid: total
-  });
-  
-  alert("Payment recorded. Receipt No: " + receipt + "\nAmount: ₹" + total + " (Includes late fee: ₹" + lateFee + ")");
-  await loadStudents();
-  
-} catch (error) {
-  console.error("Error marking as paid:", error);
-  alert("Error recording payment. Please try again.");
-}
-}
-
-async function deleteStudent(id){
-if(!confirm("Delete this student?")) return;
-
-try {
-  await deleteDoc(doc(db, "students", id));
-  await loadStudents();
-  alert("Student deleted successfully!");
-} catch (error) {
-  console.error("Error deleting student:", error);
-  alert("Error deleting student. Please try again.");
-}
-}
-
-async function editStudent(id){
-try {
-  let s = students.find(x => x.id == id);
-  if (!s) return;
-  
-  let newPhone = prompt("Edit phone (10 digits)", s.phone.replace('91', ''));
-  if (newPhone === null) return;
-  
-  // Validate phone
-  let digitsOnly = newPhone.replace(/\D/g, '');
-  if (digitsOnly.length !== 10) {
-    alert("Please enter a valid 10-digit phone number");
-    return;
-  }
-  
-  let newFee = prompt("Edit monthly fee amount", s.fee);
-  if (newFee === null) return;
-  
-  await updateDoc(doc(db, "students", id), {
-    phone: cleanPhone(newPhone),
-    fee: parseInt(newFee)
-  });
-  
-  await loadStudents();
-  alert("Student updated successfully!");
-  
-} catch (error) {
-  console.error("Error editing student:", error);
-  alert("Error updating student. Please try again.");
-}
-}
-
-function sendReminders(){
-let count = 0;
-let today = new Date();
-today.setHours(0,0,0,0);
-
-// Get the 10th of current month
-let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-tenthOfMonth.setHours(0,0,0,0);
-
-// Only send reminders if today is on or after the 10th
-if (today < tenthOfMonth) {
-  alert("Reminders can only be sent on or after the 10th of the month.");
-  return;
-}
-
-students.forEach((s)=>{
-  if (!s.paid) {
-    let lateFee = calculateLateFee(s.due, false);
-    if (lateFee > 0) {
-      let total = parseInt(s.fee) + lateFee;
-      sendReminder(s.phone, s.name, s.fee, lateFee, total);
-      count++;
-    }
-  }
-});
-
-if(count===0) alert("No overdue students found for this month.");
-}
-
-function downloadReport(){
-let csv = "Name,Phone,Course,Monthly Fee,Due Date,Status,Late Fee,Total,Receipt Number,Paid Date\n";
-
-students.forEach(s=>{
-  let lateFee = calculateLateFee(s.due, s.paid);
-  let total = parseInt(s.fee || 0) + lateFee;
-  let status = s.paid ? "Paid" : (lateFee > 0 ? "Overdue" : "Pending");
-  
-  csv += `"${s.name}","${s.phone}","${s.course}","${s.fee}","${s.due}","${status}","${lateFee}","${total}","${s.receiptNumber || ''}","${s.paidDate || ''}"\n`;
-});
-
-let blob = new Blob([csv], { type: 'text/csv' });
-let url = URL.createObjectURL(blob);
-
-let a = document.createElement("a");
-a.href = url;
-a.download = "student_fees_report.csv";
-a.click();
-
-URL.revokeObjectURL(url);
-}
-
-function render(){
-let tbody = document.getElementById("table");
-let mobile = document.getElementById("mobileList");
-
-if (!tbody || !mobile) return;
-
-tbody.innerHTML = "";
-mobile.innerHTML = "";
-
-let overdueCount = 0;
-let collected = 0;
-let pending = 0;
-let today = new Date();
-today.setHours(0,0,0,0);
-
-// Get the 10th of current month for display
-let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
-tenthOfMonth.setHours(0,0,0,0);
-let isAfterTenth = today >= tenthOfMonth;
-
-// Filter students based on search query
-let filtered = students;
-if (currentSearchQuery) {
-  filtered = students.filter(s => 
-    s.name && s.name.toLowerCase().includes(currentSearchQuery)
-  );
-}
-
-// Dashboard calculations using ALL students (not filtered)
-students.forEach(s => {
-  let lateFee = calculateLateFee(s.due, s.paid);
-  let total = parseInt(s.fee || 0) + lateFee;
-  
-  if (s.paid) {
-    collected += total;
-  } else {
-    pending += total;
-    if (lateFee > 0) {
-      overdueCount++;
-    }
-  }
-});
-
-// Update dashboard
-document.getElementById("students").innerHTML = "Students: " + students.length;
-document.getElementById("collected").innerHTML = "Collected: ₹" + collected;
-document.getElementById("pending").innerHTML = "Pending: ₹" + pending;
-document.getElementById("overdue").innerHTML = "Overdue: " + overdueCount;
-
-// Show no results message if needed
-if (filtered.length === 0 && currentSearchQuery) {
-  let noResultsMsg = `<tr><td colspan="10" class="no-results">No student found matching "${currentSearchQuery}"</td></tr>`;
-  tbody.innerHTML = noResultsMsg;
-  mobile.innerHTML = `<div class="no-results">No student found matching "${currentSearchQuery}"</div>`;
-  return;
-}
-
-// Render filtered students
-filtered.forEach(s => {
-  let lateFee = calculateLateFee(s.due, s.paid);
-  let total = parseInt(s.fee || 0) + lateFee;
-  let status = "Pending";
-  
-  if (s.paid) {
-    status = "Paid";
-  } else if (lateFee > 0) {
-    status = "Overdue";
-  }
-  
-  // Format due date for display
-  let dueDate = new Date(s.due);
-  let formattedDueDate = dueDate.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-  
-  // Display phone number without 91 prefix for better readability
-  let displayPhone = s.phone || '';
-  if (displayPhone.startsWith('91') && displayPhone.length === 12) {
-    displayPhone = displayPhone.substring(2);
-  }
-  
-  // Reminder button - only show if after 10th and not paid
-  let reminder = s.paid
-    ? '<span class="disabled-btn">Paid</span>'
-    : (isAfterTenth 
-        ? `<button onclick="sendReminder('${s.id}')">📱 Send Reminder</button>`
-        : '<span class="disabled-btn">Reminder (after 10th)</span>');
-  
-  // Receipt button for paid students
-  let receiptBtn = s.paid
-    ? `<button onclick="sendReceipt('${s.id}')">📱 Receipt</button>`
-    : "";
-  
-  // Table row - pass only the ID to functions
-  tbody.innerHTML += `
-<tr>
-  <td>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
-  <td>${displayPhone}</td>
-  <td>${s.course || ''}</td>
-  <td>₹${s.fee || 0}</td>
-  <td>₹${lateFee}</td>
-  <td><strong>₹${total}</strong></td>
-  <td class="${lateFee > 0 ? 'overdue' : (s.paid ? 'paid' : '')}">${status}</td>
-  <td>${formattedDueDate}</td>
-  <td>
-    <button onclick="editStudent('${s.id}')">✏️ Edit</button>
-    <button onclick="markPaid('${s.id}')">✅ Paid</button>
-    <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
-    ${receiptBtn}
-  </td>
-  <td>${reminder}</td>
-</tr>
-`;
-  
-  // Mobile card
-  mobile.innerHTML += `
-<div class="mobile-card">
-  <h3>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee</span>' : ''}</h3>
-  <strong>Course:</strong> ${s.course || ''}<br>
-  <strong>Phone:</strong> ${displayPhone}<br>
-  <strong>Monthly Fee:</strong> ₹${s.fee || 0}<br>
-  <strong>Late Fee:</strong> ₹${lateFee}<br>
-  <strong>Total Due:</strong> ₹${total}<br>
-  <strong>Status:</strong> <span class="${lateFee > 0 ? 'overdue' : (s.paid ? 'paid' : '')}">${status}</span><br>
-  <strong>Due Date:</strong> ${formattedDueDate}<br>
-  ${lateFee > 0 ? '<div class="late-fee-info">⚠️ Late fee of ₹100 applied (after 10th of month)</div>' : ''}
-  <br>
-  
-  <button onclick="editStudent('${s.id}')">✏️ Edit</button>
-  <button onclick="markPaid('${s.id}')">✅ Mark Paid</button>
-  <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
-  ${receiptBtn}
-  <br><br>
-  ${reminder}
-</div>
-`;
-});
-}
-
-// Wrapper functions that get student data by ID
-window.sendReminder = function(id) {
-  let student = students.find(s => s.id === id);
-  if (student) {
-    let lateFee = calculateLateFee(student.due, false);
-    let total = parseInt(student.fee) + lateFee;
-    sendReminder(student.phone, student.name, student.fee, lateFee, total);
-  }
-};
-
-window.sendReceipt = function(id) {
-  let student = students.find(s => s.id === id);
-  if (student && student.paid) {
-    let lateFee = calculateLateFee(student.due, true);
-    let total = parseInt(student.fee) + lateFee;
-    sendReceipt(student.phone, student.name, total, student.receiptNumber, student.paidDate, lateFee);
-  }
-};
-
-// Make other functions globally available
-window.addStudent = addStudent;
-window.markPaid = markPaid;
-window.deleteStudent = deleteStudent;
-window.editStudent = editStudent;
-window.sendReminders = sendReminders;
-window.downloadReport = downloadReport;
-window.searchStudents = searchStudents;
-window.logout = logout;
-
-</script>
-
+    <!-- subtle action element — understated button -->
+    <div class="button">
+      découvrir l’archive
+    </div>
+    <div class="footnote">
+      ✻ composition typographique ✻
+    </div>
+  </div>
 </body>
 </html>
