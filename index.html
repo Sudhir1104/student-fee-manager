@@ -82,7 +82,7 @@ opacity:0.9;
 }
 
 .container{
-max-width:1200px;
+max-width:1000px;
 margin:auto;
 background:white;
 padding:20px;
@@ -119,11 +119,6 @@ color:#e53935;
 font-weight:bold;
 }
 
-.paid{
-color:#28a745;
-font-weight:bold;
-}
-
 .disabled-btn{
 background:#ccc;
 color:#666;
@@ -147,20 +142,6 @@ color:white;
 padding:15px;
 border-radius:8px;
 text-align:center;
-min-width:120px;
-}
-
-.card.paid-card{
-background:#28a745;
-}
-
-.card.pending-card{
-background:#ffc107;
-color:#333;
-}
-
-.card.overdue-card{
-background:#e53935;
 }
 
 table{
@@ -257,174 +238,6 @@ margin-top: 0;
 color: #2d89ef;
 }
 
-/* Report Section Styles */
-.report-section{
-background: #f8f9fa;
-border-radius: 10px;
-padding: 20px;
-margin: 20px 0;
-border: 2px solid #2d89ef;
-}
-
-.report-header{
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-
-.report-header h3{
-margin: 0;
-color: #2d89ef;
-font-size: 20px;
-}
-
-.report-actions{
-display: flex;
-gap: 10px;
-}
-
-.report-actions button{
-width: auto;
-padding: 8px 16px;
-margin: 0;
-}
-
-.report-summary{
-display: flex;
-gap: 15px;
-flex-wrap: wrap;
-margin-bottom: 20px;
-}
-
-.summary-card{
-flex: 1;
-min-width: 150px;
-background: white;
-padding: 15px;
-border-radius: 8px;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-text-align: center;
-border-left: 4px solid #2d89ef;
-}
-
-.summary-card.paid{
-border-left-color: #28a745;
-}
-
-.summary-card.pending{
-border-left-color: #ffc107;
-}
-
-.summary-card.overdue{
-border-left-color: #e53935;
-}
-
-.summary-card h4{
-margin: 0 0 10px 0;
-color: #666;
-font-size: 14px;
-}
-
-.summary-card .number{
-font-size: 28px;
-font-weight: bold;
-color: #333;
-}
-
-.summary-card .percentage{
-font-size: 14px;
-color: #666;
-margin-top: 5px;
-}
-
-.summary-card .amount{
-font-size: 18px;
-color: #2d89ef;
-margin-top: 5px;
-}
-
-.report-filters{
-display: flex;
-gap: 10px;
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-
-.report-filters select, .report-filters input{
-width: auto;
-flex: 1;
-min-width: 150px;
-margin: 0;
-}
-
-.report-table-container{
-max-height: 400px;
-overflow-y: auto;
-border: 1px solid #ddd;
-border-radius: 8px;
-background: white;
-}
-
-.report-table{
-width: 100%;
-border-collapse: collapse;
-}
-
-.report-table th{
-background: #2d89ef;
-color: white;
-padding: 12px;
-position: sticky;
-top: 0;
-z-index: 10;
-}
-
-.report-table td{
-padding: 10px 12px;
-border-bottom: 1px solid #eee;
-}
-
-.report-table tr:hover{
-background: #f5f5f5;
-}
-
-.report-table .status-badge{
-display: inline-block;
-padding: 4px 8px;
-border-radius: 4px;
-font-size: 12px;
-font-weight: bold;
-}
-
-.status-paid{
-background: #d4edda;
-color: #155724;
-}
-
-.status-pending{
-background: #fff3cd;
-color: #856404;
-}
-
-.status-overdue{
-background: #f8d7da;
-color: #721c24;
-}
-
-.report-footer{
-margin-top: 20px;
-display: flex;
-justify-content: flex-end;
-gap: 10px;
-}
-
-.report-footer button{
-width: auto;
-padding: 8px 16px;
-}
-
 @media(max-width:700px){
 
 table{display:none}
@@ -433,22 +246,6 @@ table{display:none}
 .logo-row{
 flex-direction:column;
 text-align:center;
-}
-
-.report-filters{
-flex-direction: column;
-}
-
-.report-filters select, .report-filters input{
-width: 100%;
-}
-
-.report-actions{
-flex-direction: column;
-}
-
-.report-actions button{
-width: 100%;
 }
 
 }
@@ -512,62 +309,14 @@ color:#666;
 </div>
 </div>
 
-<!-- Quick Stats Dashboard -->
 <div class="dashboard">
-<div class="card" id="totalStudents">Total: 0</div>
-<div class="card paid-card" id="paidStudents">Paid: 0</div>
-<div class="card pending-card" id="pendingStudents">Pending: 0</div>
-<div class="card overdue-card" id="overdueStudents">Overdue: 0</div>
-<div class="card" id="totalCollected">Collected: ₹0</div>
-<div class="card" id="totalPending">Pending: ₹0</div>
-<div class="card" id="totalLateFees">Late Fees: ₹0</div>
+<div class="card" id="students">Students: 0</div>
+<div class="card" id="collected">Collected: ₹0</div>
+<div class="card" id="pending">Pending: ₹0</div>
+<div class="card" id="overdue">Overdue: 0</div>
+<div class="card" id="lateFees">Late Fees: ₹0</div>
 </div>
 
-<!-- Report Section -->
-<div class="report-section">
-<div class="report-header">
-<h3>📊 Payment Report</h3>
-<div class="report-actions">
-<button onclick="generateSimpleReport()" style="background:#28a745;">📋 Simple Report</button>
-<button onclick="generateDetailedReport()" style="background:#17a2b8;">📑 Detailed Report</button>
-<button onclick="downloadReportPDF()" style="background:#dc3545;">📥 Download PDF</button>
-<button onclick="printReport()" style="background:#6c757d;">🖨️ Print Report</button>
-</div>
-</div>
-
-<div class="report-summary" id="reportSummary">
-<!-- Dynamic summary cards will be inserted here -->
-</div>
-
-<div class="report-filters">
-<select id="reportFilter">
-<option value="all">All Students</option>
-<option value="paid">Paid Only</option>
-<option value="pending">Pending Only</option>
-<option value="overdue">Overdue Only</option>
-</select>
-<input type="text" id="reportSearch" placeholder="Search in report..." onkeyup="filterReport()">
-<select id="reportSort">
-<option value="name">Sort by Name</option>
-<option value="fee">Sort by Fee</option>
-<option value="due">Sort by Due Date</option>
-<option value="status">Sort by Status</option>
-</select>
-<button onclick="filterReport()" style="width: auto;">Apply Filters</button>
-</div>
-
-<div class="report-table-container" id="reportContainer">
-<!-- Report table will be inserted here -->
-</div>
-
-<div class="report-footer">
-<div id="reportStats"></div>
-<button onclick="exportReportToExcel()" style="background:#28a745;">📊 Export to Excel</button>
-<button onclick="copyReportToClipboard()" style="background:#6c757d;">📋 Copy to Clipboard</button>
-</div>
-</div>
-
-<!-- Action Buttons -->
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
 📩 Send Fine Notice to All Overdue Students (After 10th of Month)
 </button>
@@ -578,7 +327,6 @@ color:#666;
 <input id="searchInput" type="text" placeholder="Search student by name..." onkeyup="searchStudents()" oninput="searchStudents()">
 </div>
 
-<!-- Add Student Form -->
 <input id="name" placeholder="Student Name">
 <input id="phone" placeholder="Parent Phone">
 <input id="course" placeholder="Course">
@@ -588,8 +336,8 @@ color:#666;
 <button onclick="addStudent()">Add Student</button>
 <button onclick="downloadReport()">Download Excel</button>
 
-<!-- Student Table -->
 <table>
+
 <thead>
 <tr>
 <th>Name</th>
@@ -606,7 +354,9 @@ color:#666;
 <th>Receipt</th>
 </tr>
 </thead>
+
 <tbody id="table"></tbody>
+
 </table>
 
 <div id="mobileList" class="mobile-list"></div>
@@ -817,7 +567,6 @@ async function loadStudents() {
       students.push({ id: doc.id, ...doc.data() });
     });
     render();
-    generateSimpleReport(); // Generate report automatically when loading students
   } catch (error) {
     console.error("Error loading students:", error);
     alert("Error loading students. Please refresh the page.");
@@ -1000,163 +749,157 @@ function searchStudents() {
   render();
 }
 
-// Report Generation Functions
-
-function generateSimpleReport() {
-  let reportContainer = document.getElementById('reportContainer');
-  let reportSummary = document.getElementById('reportSummary');
+function render() {
+  let tbody = document.getElementById('table');
+  let mobileList = document.getElementById('mobileList');
   
-  // Calculate statistics
+  if (!tbody || !mobileList) return;
+  
+  tbody.innerHTML = '';
+  mobileList.innerHTML = '';
+  
+  let today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Get the 10th of current month
+  let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+  tenthOfMonth.setHours(0, 0, 0, 0);
+  let isAfterTenth = today >= tenthOfMonth;
+  
+  // Calculate dashboard totals
   let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let overdueStudents = students.filter(s => {
-    if (s.paid) return false;
-    let lateFee = calculateSimpleLateFee(s.due, false);
-    return lateFee > 0;
-  }).length;
+  let totalCollected = 0;
+  let totalPending = 0;
+  let totalOverdue = 0;
+  let totalLateFees = 0;
   
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
+  students.forEach(student => {
+    let lateFee = calculateSimpleLateFee(student.due, student.paid);
+    let total = student.fee + lateFee;
+    
+    if (student.paid) {
+      totalCollected += total;
+    } else {
+      totalPending += total;
+      if (lateFee > 0) {
+        totalOverdue++;
+        totalLateFees += lateFee;
+      }
     }
-    return sum;
-  }, 0);
+  });
   
-  let totalPending = students.reduce((sum, s) => {
-    if (!s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, false);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
+  // Update dashboard
+  document.getElementById('students').innerHTML = `Students: ${totalStudents}`;
+  document.getElementById('collected').innerHTML = `Collected: ₹${totalCollected}`;
+  document.getElementById('pending').innerHTML = `Pending: ₹${totalPending}`;
+  document.getElementById('overdue').innerHTML = `Overdue: ${totalOverdue}`;
+  document.getElementById('lateFees').innerHTML = `Late Fees: ₹${totalLateFees}`;
   
-  let totalLateFees = students.reduce((sum, s) => {
-    return sum + calculateSimpleLateFee(s.due, s.paid);
-  }, 0);
+  // Filter students for display
+  let filteredStudents = students;
+  if (currentSearchQuery) {
+    filteredStudents = students.filter(student => 
+      student.name && student.name.toLowerCase().includes(currentSearchQuery)
+    );
+  }
   
-  // Update summary cards
-  reportSummary.innerHTML = `
-    <div class="summary-card paid">
-      <h4>✅ Paid Students</h4>
-      <div class="number">${paidStudents}</div>
-      <div class="percentage">${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalCollected}</div>
-    </div>
-    <div class="summary-card pending">
-      <h4>⏳ Pending Students</h4>
-      <div class="number">${pendingStudents}</div>
-      <div class="percentage">${totalStudents ? ((pendingStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalPending}</div>
-    </div>
-    <div class="summary-card overdue">
-      <h4>⚠️ Overdue Students</h4>
-      <div class="number">${overdueStudents}</div>
-      <div class="percentage">${totalStudents ? ((overdueStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">₹${totalLateFees} (Late Fees)</div>
-    </div>
-  `;
+  if (filteredStudents.length === 0 && currentSearchQuery) {
+    tbody.innerHTML = `<tr><td colspan="12" class="no-results">No students found matching "${currentSearchQuery}"</td></tr>`;
+    mobileList.innerHTML = `<div class="no-results">No students found matching "${currentSearchQuery}"</div>`;
+    return;
+  }
   
-  // Generate simple report table
-  let reportHTML = `
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Student Name</th>
-          <th>Course</th>
-          <th>Monthly Fee</th>
-          <th>Status</th>
-          <th>Due Date</th>
-          <th>Late Fee</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-  
-  students.forEach((student, index) => {
+  // Render table rows
+  filteredStudents.forEach(student => {
     let lateFee = calculateSimpleLateFee(student.due, student.paid);
     let total = student.fee + lateFee;
     let status = student.paid ? 'Paid' : (lateFee > 0 ? 'Overdue' : 'Pending');
-    let statusClass = status.toLowerCase();
     
-    reportHTML += `
+    // Format date
+    let dueDate = new Date(student.due);
+    let formattedDueDate = dueDate.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+    
+    // Escape for HTML attributes
+    let safeName = (student.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+    let safePhone = (student.phone || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+    
+    // Generate buttons
+    let reminderBtn = student.paid 
+      ? '<span class="disabled-btn">Paid</span>'
+      : (isAfterTenth
+        ? `<button onclick="sendReminderWithQR('${safePhone}', '${safeName}', ${student.fee}, ${lateFee}, ${total})">📱 Send Reminder</button>`
+        : '<span class="disabled-btn">Reminder (after 10th)</span>');
+    
+    let receiptBtn = student.paid
+      ? `<button onclick="sendReceipt('${safePhone}', '${safeName}', ${total}, '${student.receiptNumber || ''}', '${student.paidDate || ''}', ${lateFee})">📱 Resend Receipt</button>`
+      : '';
+    
+    // Table row
+    tbody.innerHTML += `
       <tr>
-        <td>${index + 1}</td>
-        <td>${student.name}</td>
+        <td>${student.name} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
+        <td>${student.phone}</td>
         <td>${student.course}</td>
         <td>₹${student.fee}</td>
-        <td><span class="status-badge status-${statusClass}">${status}</span></td>
-        <td>${new Date(student.due).toLocaleDateString()}</td>
         <td>₹${lateFee}</td>
         <td><strong>₹${total}</strong></td>
+        <td class="${lateFee > 0 ? 'overdue' : ''}">${status}</td>
+        <td>${formattedDueDate}</td>
+        <td>
+          <button onclick="editStudent('${student.id}')">✏️ Edit</button>
+          <button onclick="markPaid('${student.id}')">✅ Paid</button>
+          <button onclick="deleteStudent('${student.id}')">🗑️ Delete</button>
+        </td>
+        <td>${reminderBtn}</td>
+        <td><button onclick="paymentQR('${safeName}', ${total})">📱 QR Pay</button></td>
+        <td>${receiptBtn}</td>
       </tr>
     `;
+    
+    // Mobile card
+    mobileList.innerHTML += `
+      <div class="mobile-card">
+        <h3>${student.name} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee</span>' : ''}</h3>
+        <strong>Course:</strong> ${student.course}<br>
+        <strong>Phone:</strong> ${student.phone}<br>
+        <strong>Monthly Fee:</strong> ₹${student.fee}<br>
+        <strong>Late Fee:</strong> ₹${lateFee}<br>
+        <strong>Total Due:</strong> ₹${total}<br>
+        <strong>Status:</strong> <span class="${lateFee > 0 ? 'overdue' : ''}">${status}</span><br>
+        <strong>Due Date:</strong> ${formattedDueDate}<br>
+        ${lateFee > 0 ? '<div class="late-fee-info">⚠️ Late fee of ₹100 applied</div>' : ''}
+        <br>
+        <button onclick="editStudent('${student.id}')">✏️ Edit</button>
+        <button onclick="markPaid('${student.id}')">✅ Mark Paid</button>
+        <button onclick="deleteStudent('${student.id}')">🗑️ Delete</button>
+        <br><br>
+        ${reminderBtn}
+        <button onclick="paymentQR('${safeName}', ${total})">📱 QR Pay</button>
+        ${receiptBtn}
+      </div>
+    `;
   });
-  
-  reportHTML += `
-      </tbody>
-    </table>
-  `;
-  
-  reportContainer.innerHTML = reportHTML;
-  
-  // Update report stats
-  document.getElementById('reportStats').innerHTML = `
-    <strong>Total Students: ${totalStudents}</strong> | 
-    Paid: ${paidStudents} | 
-    Pending: ${pendingStudents} | 
-    Overdue: ${overdueStudents} | 
-    Collection Rate: ${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}%
-  `;
 }
 
-function generateDetailedReport() {
-  let reportContainer = document.getElementById('reportContainer');
-  let reportSummary = document.getElementById('reportSummary');
-  
-  // Calculate statistics
-  let totalStudents = students.length;
-  let paidStudents = students.filter(s => s.paid).length;
-  let pendingStudents = students.filter(s => !s.paid).length;
-  let overdueStudents = students.filter(s => {
-    if (s.paid) return false;
-    let lateFee = calculateSimpleLateFee(s.due, false);
-    return lateFee > 0;
-  }).length;
-  
-  let totalCollected = students.reduce((sum, s) => {
-    if (s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, true);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalPending = students.reduce((sum, s) => {
-    if (!s.paid) {
-      let lateFee = calculateSimpleLateFee(s.due, false);
-      return sum + s.fee + lateFee;
-    }
-    return sum;
-  }, 0);
-  
-  let totalLateFees = students.reduce((sum, s) => {
-    return sum + calculateSimpleLateFee(s.due, s.paid);
-  }, 0);
-  
-  // Update summary cards with more details
-  reportSummary.innerHTML = `
-    <div class="summary-card paid">
-      <h4>✅ Paid Students</h4>
-      <div class="number">${paidStudents}</div>
-      <div class="percentage">${totalStudents ? ((paidStudents/totalStudents)*100).toFixed(1) : 0}% of total</div>
-      <div class="amount">Collected: ₹${totalCollected}</div>
-      <div style="font-size:12px; margin-top:5px;">Avg: ₹${paidStudents ? Math.round(totalCollected/paidStudents) : 0}/student</div>
-    </div>
-    <div class="summary-card pending">
-      <h4>⏳ Pending Students</h4>
-      <div class="number">${pendingStudents}</div>
-      <div class="percentage">${totalStudents ? ((pending
+// Make functions globally available
+window.addStudent = addStudent;
+window.markPaid = markPaid;
+window.deleteStudent = deleteStudent;
+window.editStudent = editStudent;
+window.paymentQR = paymentQR;
+window.sendReminder = sendReminder;
+window.sendReminderWithQR = sendReminderWithQR;
+window.sendReminders = sendReminders;
+window.sendReceipt = sendReceipt;
+window.downloadReport = downloadReport;
+window.searchStudents = searchStudents;
+window.logout = logout;
+
+</script>
+
+</body>
+</html>
