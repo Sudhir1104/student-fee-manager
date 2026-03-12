@@ -16,8 +16,6 @@ margin:0;
 padding:20px;
 }
 
-/* HEADER */
-
 .header{
 background:#2d89ef;
 border-radius:10px;
@@ -47,8 +45,6 @@ font-size:15px;
 opacity:0.9;
 }
 
-/* CONTAINER */
-
 .container{
 max-width:1000px;
 margin:auto;
@@ -57,8 +53,6 @@ padding:20px;
 border-radius:10px;
 box-shadow:0 3px 12px rgba(0,0,0,0.15);
 }
-
-/* INPUTS */
 
 input,button{
 padding:10px;
@@ -83,8 +77,6 @@ background:#1b5fbf;
 background:#e53935;
 }
 
-/* STATUS */
-
 .overdue{
 color:#e53935;
 font-weight:bold;
@@ -96,8 +88,6 @@ color:#666;
 padding:6px 10px;
 border-radius:5px;
 }
-
-/* DASHBOARD */
 
 .dashboard{
 display:flex;
@@ -115,8 +105,6 @@ border-radius:8px;
 text-align:center;
 }
 
-/* TABLE */
-
 table{
 width:100%;
 border-collapse:collapse;
@@ -127,8 +115,6 @@ th,td{
 padding:8px;
 border-bottom:1px solid #ddd;
 }
-
-/* MOBILE CARDS */
 
 .mobile-card{
 background:#f8f8f8;
@@ -253,15 +239,11 @@ const db=getFirestore(app);
 
 let students=[];
 
-/* PHONE CLEAN */
-
 function cleanPhone(phone){
 phone=phone.replace(/\D/g,'');
 if(!phone.startsWith("91")) phone="91"+phone;
 return phone;
 }
-
-/* REMINDER */
 
 function sendReminder(phone,name,total){
 
@@ -278,8 +260,6 @@ let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent
 window.open(url,'_blank');
 
 }
-
-/* RECEIPT */
 
 function sendReceipt(phone,name,amount,receipt,date){
 
@@ -300,8 +280,6 @@ window.open(url,'_blank');
 
 }
 
-/* LOAD */
-
 async function loadStudents(){
 
 students=[];
@@ -318,16 +296,14 @@ render();
 
 }
 
-/* ADD */
-
 async function addStudent(){
 
 let student={
-name:name.value,
-phone:cleanPhone(phone.value),
-course:course.value,
-fee:fee.value,
-due:due.value,
+name:document.getElementById("name").value,
+phone:cleanPhone(document.getElementById("phone").value),
+course:document.getElementById("course").value,
+fee:document.getElementById("fee").value,
+due:document.getElementById("due").value,
 paid:false
 };
 
@@ -338,8 +314,6 @@ document.querySelectorAll("input").forEach(i=>i.value="");
 loadStudents();
 
 }
-
-/* MARK PAID */
 
 async function markPaid(id){
 
@@ -356,8 +330,6 @@ loadStudents();
 
 }
 
-/* DELETE */
-
 async function deleteStudent(id){
 
 if(!confirm("Delete this student?")) return;
@@ -367,8 +339,6 @@ await deleteDoc(doc(db,"students",id));
 loadStudents();
 
 }
-
-/* EDIT */
 
 async function editStudent(id){
 
@@ -386,8 +356,6 @@ loadStudents();
 
 }
 
-/* QR */
-
 function paymentQR(name,amount){
 
 let upi="schoolfees@upi";
@@ -399,8 +367,6 @@ let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeUR
 window.open(qr,'_blank');
 
 }
-
-/* BULK REMINDERS */
 
 function sendReminders(){
 
@@ -416,8 +382,6 @@ sendReminder(s.phone,s.name,s.fee);
 });
 
 }
-
-/* EXPORT */
 
 function downloadReport(){
 
@@ -436,8 +400,6 @@ a.download="fees.csv";
 a.click();
 
 }
-
-/* RENDER */
 
 function render(){
 
