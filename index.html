@@ -204,6 +204,22 @@ padding:20px;
 font-style:italic;
 }
 
+.late-fee-badge{
+background: #ff9800;
+color: white;
+padding: 3px 8px;
+border-radius: 12px;
+font-size: 12px;
+font-weight: bold;
+margin-left: 5px;
+}
+
+.late-fee-info{
+font-size: 12px;
+color: #e53935;
+margin-top: 5px;
+}
+
 @media(max-width:700px){
 
 table{display:none}
@@ -239,6 +255,7 @@ color:#666;
 <div class="title-block">
 <h1>Srishti Centre for Performing Arts</h1>
 <h2>Student Fee Manager</h2>
+<p style="font-size: 14px; margin: 5px 0 0 0;">Late Fee: ₹100 after 10th of every month</p>
 </div>
 </div>
 
@@ -256,10 +273,11 @@ color:#666;
 <div class="card" id="collected">Collected: ₹0</div>
 <div class="card" id="pending">Pending: ₹0</div>
 <div class="card" id="overdue">Overdue: 0</div>
+<div class="card" id="lateFees">Late Fees: ₹0</div>
 </div>
 
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
-📩 Send Fine Notice to All Overdue Students
+📩 Send Fine Notice to All Overdue Students (After 10th of Month)
 </button>
 
 <!-- Search Bar -->
@@ -271,8 +289,8 @@ color:#666;
 <input id="name" placeholder="Student Name">
 <input id="phone" placeholder="Parent Phone">
 <input id="course" placeholder="Course">
-<input id="fee" type="number" placeholder="Fee">
-<input id="due" type="date">
+<input id="fee" type="number" placeholder="Monthly Fee">
+<input id="due" type="date" value="2026-03-10">
 
 <button onclick="addStudent()">Add Student</button>
 <button onclick="downloadReport()">Download Excel</button>
@@ -284,10 +302,11 @@ color:#666;
 <th>Name</th>
 <th>Phone</th>
 <th>Course</th>
-<th>Fee</th>
-<th>Late</th>
+<th>Monthly Fee</th>
+<th>Late Fee</th>
 <th>Total</th>
 <th>Status</th>
+<th>Due Date</th>
 <th>Actions</th>
 <th>Reminder</th>
 <th>QR</th>
@@ -331,6 +350,10 @@ const auth=getAuth(app);
 // Global students array
 let students=[];
 
+// Constants
+const LATE_FEE_AMOUNT = 100;
+const LATE_FEE_DAY = 10; // 10th of every month
+
 // Auth guard – redirect to login if not signed in
 onAuthStateChanged(auth,(user)=>{
   if(!user){
@@ -353,31 +376,103 @@ if(!phone.startsWith("91")) phone="91"+phone;
 return phone;
 }
 
-function sendReminder(phone,name,total){
+// Function to calculate late fee based on 10th of month rule
+function calculateLateFee(dueDate, isPaid) {
+  if (isPaid) return 0;
+  
+  let today = new Date();
+  today.setHours(0,0,0,0);
+  
+  let due = new Date(dueDate);
+  due.setHours(0,0,0,0);
+  
+  // Get the 10th of current month
+  let currentMonth10th = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+  currentMonth10th.setHours(0,0,0,0);
+  
+  // Get the 10th of due date's month
+  let dueMonth10th = new Date(due.getFullYear(), due.getMonth(), LATE_FEE_DAY);
+  dueMonth10th.setHours(0,0,0,0);
+  
+  // If today is after the 10th of current month AND payment is not made
+  if (today > currentMonth10th) {
+    // Check if the due date was before or on the 10th of its month
+    // If due date was after the 10th, they should have paid by the 10th of next month
+    if (due <= dueMonth10th) {
+      // They should have paid by the 10th of due date's month
+      if (today > dueMonth10th) {
+        return LATE_FEE_AMOUNT;
+      }
+    } else {
+      // They should have paid by the 10th of next month
+      let nextMonth10th = new Date(due.getFullYear(), due.getMonth() + 1, LATE_FEE_DAY);
+      nextMonth10th.setHours(0,0,0,0);
+      if (today > nextMonth10th) {
+        return LATE_FEE_AMOUNT;
+      }
+    }
+  }
+  
+  return 0;
+}
+
+// Simplified version - if today is after the 10th and not paid, add late fee
+function calculateSimpleLateFee(dueDate, isPaid) {
+  if (isPaid) return 0;
+  
+  let today = new Date();
+  today.setHours(0,0,0,0);
+  
+  let due = new Date(dueDate);
+  due.setHours(0,0,0,0);
+  
+  // Get current month and year
+  let currentYear = today.getFullYear();
+  let currentMonth = today.getMonth();
+  
+  // Create date for 10th of current month
+  let tenthOfCurrentMonth = new Date(currentYear, currentMonth, LATE_FEE_DAY);
+  tenthOfCurrentMonth.setHours(0,0,0,0);
+  
+  // If today is on or after the 10th of current month
+  if (today >= tenthOfCurrentMonth) {
+    // Check if the due date was before this month's 10th
+    // Or if it's a new month and payment hasn't been made
+    return LATE_FEE_AMOUNT;
+  }
+  
+  return 0;
+}
+
+function sendReminder(phone, name, baseFee, lateFee, total){
 phone=cleanPhone(phone);
 let message=
 "Dear Parent,\n\n"+
-"This is a reminder that the fee for *"+name+"* is overdue.\n\n"+
-"Fee: ₹"+(total-100)+"\n"+
-"Late Fine: ₹100\n"+
-"Total Due: ₹"+total+"\n\n"+
+"This is a reminder that the fee for *" + name + "* is overdue.\n\n"+
+"Monthly Fee: ₹" + baseFee + "\n" +
+"Late Fee (after 10th): ₹" + lateFee + "\n" +
+"Total Due: ₹" + total + "\n\n"+
 "Please make payment immediately to avoid further penalties.\n\n"+
-"Srishti Centre for Performing Arts";
+"Srishti Centre for Performing Arts\n" +
+"Note: Late fee of ₹100 applies after the 10th of every month.";
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 window.open(url,'_blank');
 }
 
-function sendReceipt(phone,name,amount,receipt,date){
+function sendReceipt(phone,name,amount,receipt,date,lateFee){
 phone=cleanPhone(phone);
 let message=
 "Srishti Centre for Performing Arts\n\n"+
 "RECEIPT\n\n"+
-"Receipt No: "+receipt+"\n"+
-"Student: "+name+"\n"+
-"Amount Paid: ₹"+amount+"\n"+
-"Date: "+date+"\n\n"+
-"Thank you for your payment.";
+"Receipt No: " + receipt + "\n"+
+"Student: " + name + "\n"+
+"Monthly Fee: ₹" + (amount - lateFee) + "\n"+
+"Late Fee: ₹" + lateFee + "\n"+
+"Total Amount Paid: ₹" + amount + "\n"+
+"Date: " + date + "\n\n"+
+"Thank you for your payment.\n"+
+"Next month's fee is due by the 10th.";
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 window.open(url,'_blank');
@@ -432,7 +527,7 @@ try {
   document.getElementById("phone").value = "";
   document.getElementById("course").value = "";
   document.getElementById("fee").value = "";
-  document.getElementById("due").value = "";
+  document.getElementById("due").value = "2026-03-10";
   
   await loadStudents();
   alert("Student added successfully!");
@@ -445,16 +540,25 @@ try {
 
 async function markPaid(id){
 try {
+  // Find the student to get their fee and late fee
+  let student = students.find(s => s.id == id);
+  if (!student) return;
+  
+  let lateFee = calculateSimpleLateFee(student.due, false);
+  let total = parseInt(student.fee) + lateFee;
+  
   let receipt = "RCPT-" + Date.now();
   let date = new Date().toISOString().slice(0,10);
   
   await updateDoc(doc(db, "students", id), {
     paid: true,
     receiptNumber: receipt,
-    paidDate: date
+    paidDate: date,
+    lateFeePaid: lateFee,
+    totalPaid: total
   });
   
-  alert("Payment recorded. Receipt No: " + receipt);
+  alert("Payment recorded. Receipt No: " + receipt + "\nAmount: ₹" + total + " (Includes late fee: ₹" + lateFee + ")");
   await loadStudents();
   
 } catch (error) {
@@ -484,7 +588,7 @@ try {
   let newPhone = prompt("Edit phone (with country code)", s.phone);
   if (newPhone === null) return;
   
-  let newFee = prompt("Edit fee amount", s.fee);
+  let newFee = prompt("Edit monthly fee amount", s.fee);
   if (newFee === null) return;
   
   await updateDoc(doc(db, "students", id), {
@@ -501,7 +605,7 @@ try {
 }
 }
 
-function paymentQR(name,amount){
+function paymentQR(name, amount){
 let upi = "61407789476@icici";
 let url = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&am=${amount}`;
 let qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
@@ -511,34 +615,41 @@ window.open(qr,'_blank');
 function sendReminders(){
 let count = 0;
 let today = new Date();
-today.setHours(0,0,0,0); // Normalize time for comparison
+today.setHours(0,0,0,0);
+
+// Get the 10th of current month
+let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+tenthOfMonth.setHours(0,0,0,0);
+
+// Only send reminders if today is on or after the 10th
+if (today < tenthOfMonth) {
+  alert("Reminders can only be sent on or after the 10th of the month.");
+  return;
+}
 
 students.forEach((s)=>{
   if (!s.paid) {
-    let due = new Date(s.due);
-    due.setHours(0,0,0,0);
-    
-    if (today > due) {
-      let total = parseInt(s.fee) + 100;
-      sendReminder(s.phone, s.name, total);
+    let lateFee = calculateSimpleLateFee(s.due, false);
+    if (lateFee > 0) {
+      let total = parseInt(s.fee) + lateFee;
+      sendReminder(s.phone, s.name, s.fee, lateFee, total);
       count++;
     }
   }
 });
 
-if(count===0) alert("No overdue students found.");
+if(count===0) alert("No overdue students found for this month.");
 }
 
 function downloadReport(){
-let csv = "Name,Phone,Course,Fee,Due Date,Status,Receipt Number,Paid Date\n";
+let csv = "Name,Phone,Course,Monthly Fee,Due Date,Status,Late Fee,Total,Receipt Number,Paid Date\n";
 
 students.forEach(s=>{
+  let lateFee = calculateSimpleLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
   let status = s.paid ? "Paid" : "Pending";
-  let today = new Date();
-  let due = new Date(s.due);
-  if (!s.paid && today > due) status = "Overdue";
   
-  csv += `"${s.name}","${s.phone}","${s.course}","${s.fee}","${s.due}","${status}","${s.receiptNumber || ''}","${s.paidDate || ''}"\n`;
+  csv += `"${s.name}","${s.phone}","${s.course}","${s.fee}","${s.due}","${status}","${lateFee}","${total}","${s.receiptNumber || ''}","${s.paidDate || ''}"\n`;
 });
 
 let blob = new Blob([csv], { type: 'text/csv' });
@@ -564,8 +675,14 @@ mobile.innerHTML = "";
 let overdueCount = 0;
 let collected = 0;
 let pending = 0;
+let totalLateFees = 0;
 let today = new Date();
 today.setHours(0,0,0,0);
+
+// Get the 10th of current month for display
+let tenthOfMonth = new Date(today.getFullYear(), today.getMonth(), LATE_FEE_DAY);
+tenthOfMonth.setHours(0,0,0,0);
+let isAfterTenth = today >= tenthOfMonth;
 
 // Get search query
 let query = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -577,47 +694,56 @@ let filtered = query
 
 // Dashboard calculations using ALL students
 students.forEach(s => {
-  let due = new Date(s.due);
-  due.setHours(0,0,0,0);
-  let late = (!s.paid && today > due) ? 100 : 0;
-  let total = parseInt(s.fee || 0) + late;
+  let lateFee = calculateSimpleLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
   
   if (s.paid) {
     collected += total;
   } else {
     pending += total;
-    if (today > due) overdueCount++;
+    if (lateFee > 0) {
+      overdueCount++;
+    }
   }
+  totalLateFees += lateFee;
 });
 
 // Update dashboard
-document.getElementById("students").innerText = "Students: " + students.length;
+document.getElementById("students").innerHTML = "Students: " + students.length;
 document.getElementById("collected").innerHTML = "Collected: ₹" + collected;
 document.getElementById("pending").innerHTML = "Pending: ₹" + pending;
 document.getElementById("overdue").innerHTML = "Overdue: " + overdueCount;
+document.getElementById("lateFees").innerHTML = "Late Fees: ₹" + totalLateFees;
 
 // Show no results message if needed
 if (filtered.length === 0 && query) {
-  let noResultsMsg = `<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
+  let noResultsMsg = `<tr><td colspan="12" class="no-results">No student found matching "${query}"</td></tr>`;
   tbody.innerHTML = noResultsMsg;
   mobile.innerHTML = `<div class="no-results">No student found matching "${query}"</div>`;
 }
 
 // Render filtered students
 filtered.forEach(s => {
-  let due = new Date(s.due);
-  due.setHours(0,0,0,0);
-  
-  let late = (!s.paid && today > due) ? 100 : 0;
+  let lateFee = calculateSimpleLateFee(s.due, s.paid);
+  let total = parseInt(s.fee || 0) + lateFee;
   let status = "Pending";
   
   if (s.paid) {
     status = "Paid";
-  } else if (today > due) {
-    status = "Overdue";
+  } else if (lateFee > 0) {
+    status = "Overdue (Late Fee Applied)";
   }
   
-  let total = parseInt(s.fee || 0) + late;
+  // Format due date for display
+  let dueDate = new Date(s.due);
+  let formattedDueDate = dueDate.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  // Add indicator if late fee applies
+  let lateFeeIndicator = lateFee > 0 ? ' <span class="late-fee-badge">+₹' + lateFee + '</span>' : '';
   
   // Escape special characters for HTML attributes
   let safePhone = (s.phone || '').replace(/'/g, "&apos;");
@@ -625,33 +751,36 @@ filtered.forEach(s => {
   let safeReceipt = (s.receiptNumber || 'N/A').replace(/'/g, "&apos;");
   let safePaidDate = (s.paidDate || '').replace(/'/g, "&apos;");
   
-  // Reminder button
+  // Reminder button - only show if after 10th and not paid
   let reminder = s.paid
     ? '<span class="disabled-btn">Paid</span>'
-    : `<button onclick="sendReminder('${safePhone}','${safeName}','${total}')">Reminder</button>`;
+    : (isAfterTenth 
+        ? `<button onclick="sendReminder('${safePhone}','${safeName}','${s.fee}','${lateFee}','${total}')">📱 Send Reminder</button>`
+        : '<span class="disabled-btn">Reminder (after 10th)</span>');
   
   // Receipt button
   let receipt = s.paid
-    ? `<button onclick="sendReceipt('${safePhone}','${safeName}','${total}','${safeReceipt}','${safePaidDate}')">Resend Receipt</button>`
+    ? `<button onclick="sendReceipt('${safePhone}','${safeName}','${total}','${safeReceipt}','${safePaidDate}','${lateFee}')">📱 Resend Receipt</button>`
     : "";
   
   // Table row
   tbody.innerHTML += `
 <tr>
-  <td>${s.name || ''}</td>
+  <td>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late</span>' : ''}</td>
   <td>${s.phone || ''}</td>
   <td>${s.course || ''}</td>
   <td>₹${s.fee || 0}</td>
-  <td>₹${late}</td>
-  <td>₹${total}</td>
-  <td class="${status == 'Overdue' ? 'overdue' : ''}">${status}</td>
+  <td>₹${lateFee}</td>
+  <td><strong>₹${total}</strong></td>
+  <td class="${lateFee > 0 ? 'overdue' : ''}">${status}</td>
+  <td>${formattedDueDate}</td>
   <td>
-    <button onclick="editStudent('${s.id}')">Edit</button>
-    <button onclick="markPaid('${s.id}')">Paid</button>
-    <button onclick="deleteStudent('${s.id}')">Delete</button>
+    <button onclick="editStudent('${s.id}')">✏️ Edit</button>
+    <button onclick="markPaid('${s.id}')">✅ Paid</button>
+    <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
   </td>
   <td>${reminder}</td>
-  <td><button onclick="paymentQR('${safeName}',${total})">QR Pay</button></td>
+  <td><button onclick="paymentQR('${safeName}',${total})">📱 QR Pay</button></td>
   <td>${receipt}</td>
 </tr>
 `;
@@ -659,21 +788,23 @@ filtered.forEach(s => {
   // Mobile card
   mobile.innerHTML += `
 <div class="mobile-card">
-  <h3>${s.name || ''}</h3>
+  <h3>${s.name || ''} ${lateFee > 0 ? '<span class="late-fee-badge">Late Fee Applied</span>' : ''}</h3>
   <strong>Course:</strong> ${s.course || ''}<br>
   <strong>Phone:</strong> ${s.phone || ''}<br>
-  <strong>Fee:</strong> ₹${s.fee || 0}<br>
-  <strong>Late:</strong> ₹${late}<br>
-  <strong>Total:</strong> ₹${total}<br>
-  <strong>Status:</strong> <span class="${status == 'Overdue' ? 'overdue' : ''}">${status}</span><br>
-  <strong>Due Date:</strong> ${s.due || ''}<br><br>
+  <strong>Monthly Fee:</strong> ₹${s.fee || 0}<br>
+  <strong>Late Fee:</strong> ₹${lateFee}<br>
+  <strong>Total Due:</strong> ₹${total}<br>
+  <strong>Status:</strong> <span class="${lateFee > 0 ? 'overdue' : ''}">${status}</span><br>
+  <strong>Due Date:</strong> ${formattedDueDate}<br>
+  ${lateFee > 0 ? '<div class="late-fee-info">⚠️ Late fee of ₹100 applied (after 10th of month)</div>' : ''}
+  <br>
   
-  <button onclick="editStudent('${s.id}')">Edit</button>
-  <button onclick="markPaid('${s.id}')">Paid</button>
-  <button onclick="deleteStudent('${s.id}')">Delete</button>
+  <button onclick="editStudent('${s.id}')">✏️ Edit</button>
+  <button onclick="markPaid('${s.id}')">✅ Mark Paid</button>
+  <button onclick="deleteStudent('${s.id}')">🗑️ Delete</button>
   <br><br>
   ${reminder}
-  <button onclick="paymentQR('${safeName}',${total})">QR Pay</button>
+  <button onclick="paymentQR('${safeName}',${total})">📱 QR Pay</button>
   ${receipt}
 </div>
 `;
