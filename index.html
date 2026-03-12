@@ -77,14 +77,6 @@ padding:8px;
 border-bottom:1px solid #ddd
 }
 
-.whatsapp{
-background:#25D366;
-padding:5px 10px;
-border-radius:5px;
-color:white;
-text-decoration:none
-}
-
 .mobile-card{
 background:#f8f8f8;
 border-radius:10px;
@@ -177,6 +169,8 @@ const db=getFirestore(app);
 
 let students=[];
 
+/* PHONE CLEAN */
+
 function cleanPhone(phone){
 
 phone=phone.replace(/\D/g,'');
@@ -189,15 +183,33 @@ return phone;
 
 }
 
-function reminderLink(phone,name,total){
+/* REMINDER FUNCTION */
+
+function sendReminder(phone,name,total){
 
 phone=cleanPhone(phone);
 
 let message="Hello, fee for "+name+" is ₹"+total+". Please make payment.";
 
-return "https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+let whatsappURL="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
+
+if(navigator.share){
+
+navigator.share({
+title:"Fee Reminder",
+text:message
+});
 
 }
+else{
+
+window.open(whatsappURL,'_blank');
+
+}
+
+}
+
+/* LOAD */
 
 async function loadStudents(){
 
@@ -216,6 +228,8 @@ students.push(data);
 render();
 
 }
+
+/* ADD */
 
 async function addStudent(){
 
@@ -236,6 +250,8 @@ loadStudents();
 
 }
 
+/* MARK PAID */
+
 async function markPaid(id){
 
 await updateDoc(doc(db,"students",id),{paid:true});
@@ -243,6 +259,8 @@ await updateDoc(doc(db,"students",id),{paid:true});
 loadStudents();
 
 }
+
+/* DELETE */
 
 async function deleteStudent(id){
 
@@ -253,6 +271,8 @@ await deleteDoc(doc(db,"students",id));
 loadStudents();
 
 }
+
+/* EDIT */
 
 async function editStudent(id){
 
@@ -270,6 +290,8 @@ loadStudents();
 
 }
 
+/* QR */
+
 function paymentQR(name,amount){
 
 let upi="schoolfees@upi";
@@ -282,6 +304,8 @@ window.open(qr,'_blank');
 
 }
 
+/* BULK REMINDER */
+
 function sendReminders(){
 
 students.forEach((s)=>{
@@ -291,13 +315,15 @@ let due=new Date(s.due);
 
 if(!s.paid && today>due){
 
-window.open(reminderLink(s.phone,s.name,s.fee),'_blank');
+sendReminder(s.phone,s.name,s.fee);
 
 }
 
 });
 
 }
+
+/* EXPORT */
 
 function downloadReport(){
 
@@ -318,6 +344,8 @@ a.download="fees.csv";
 a.click();
 
 }
+
+/* RENDER */
 
 function render(){
 
@@ -356,9 +384,9 @@ let total=parseInt(s.fee)+late;
 if(s.paid)collected+=total;
 else pending+=total;
 
-let reminder=s.paid
+let reminderButton=s.paid
 ?'<span class="disabled-btn">Paid</span>'
-:`<a class="whatsapp" target="_blank" href="${reminderLink(s.phone,s.name,total)}">Reminder</a>`;
+:`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
 
 let row=`
 <tr>
@@ -374,7 +402,7 @@ let row=`
 <button onclick="markPaid('${s.id}')">Paid</button>
 <button onclick="deleteStudent('${s.id}')">Delete</button>
 </td>
-<td>${reminder}</td>
+<td>${reminderButton}</td>
 <td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
 </tr>
 `;
@@ -397,7 +425,7 @@ Status <span class="${status=='Overdue'?'overdue':''}">${status}</span>
 
 <br><br>
 
-${reminder}
+${reminderButton}
 <button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
 
 </div>
@@ -420,6 +448,7 @@ window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
 window.editStudent=editStudent;
 window.paymentQR=paymentQR;
+window.sendReminder=sendReminder;
 window.sendReminders=sendReminders;
 window.downloadReport=downloadReport;
 
