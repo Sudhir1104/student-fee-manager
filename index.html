@@ -6,30 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2d89ef">
 
 <style>
 
 body{font-family:Arial;background:#eef2f7;margin:0;padding:20px}
 
-/* HEADER */
-
-.header{
-text-align:center;
-margin-bottom:20px
-}
-
-.header img{
-height:80px;
-display:block;
-margin:auto
-}
-
-h1{
-margin-top:10px
-}
-
-/* CONTAINER */
+.header{text-align:center;margin-bottom:20px}
+.header img{height:80px;margin:auto;display:block}
 
 .container{
 max-width:1000px;
@@ -39,8 +22,6 @@ padding:20px;
 border-radius:10px;
 box-shadow:0 3px 12px rgba(0,0,0,0.15)
 }
-
-/* INPUTS */
 
 input,button{
 padding:10px;
@@ -57,29 +38,12 @@ border:none;
 cursor:pointer
 }
 
-button:hover{
-background:#1b5fbf
-}
-
-/* REMINDER BUTTON */
-
-.reminder-btn{
-background:#e53935;
-color:white
-}
-
-.reminder-btn:hover{
-background:#c62828
-}
-
-/* OVERDUE */
+.reminder-btn{background:#e53935}
 
 .overdue{
 color:#e53935;
 font-weight:bold
 }
-
-/* DISABLED */
 
 .disabled-btn{
 background:#cccccc;
@@ -87,8 +51,6 @@ color:#666;
 padding:6px 10px;
 border-radius:5px
 }
-
-/* DASHBOARD */
 
 .dashboard{
 display:flex;
@@ -102,11 +64,8 @@ flex:1;
 background:#2d89ef;
 color:white;
 padding:15px;
-border-radius:8px;
-min-width:180px
+border-radius:8px
 }
-
-/* TABLE */
 
 table{
 width:100%;
@@ -116,21 +75,16 @@ margin-top:20px
 
 th,td{
 padding:8px;
-border-bottom:1px solid #ddd;
-text-align:left
+border-bottom:1px solid #ddd
 }
-
-/* WHATSAPP */
 
 .whatsapp{
 background:#25D366;
-color:white;
 padding:5px 10px;
 border-radius:5px;
+color:white;
 text-decoration:none
 }
-
-/* MOBILE CARD */
 
 .mobile-card{
 background:#f8f8f8;
@@ -140,33 +94,12 @@ margin-bottom:10px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1)
 }
 
-.mobile-card h3{
-margin:0 0 5px 0
-}
+.mobile-list{display:none}
 
-.mobile-actions{
-margin-top:8px;
-display:flex;
-gap:10px
-}
+@media(max-width:700px){
 
-.mobile-actions button{
-width:auto
-}
-
-.mobile-list{
-display:none
-}
-
-@media (max-width:700px){
-
-table{
-display:none
-}
-
-.mobile-list{
-display:block
-}
+table{display:none}
+.mobile-list{display:block}
 
 }
 
@@ -189,20 +122,18 @@ display:block
 <div class="card" id="overdue">Overdue: 0</div>
 </div>
 
-<h3>Add Student</h3>
-
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
 Send reminders (0 overdue)
 </button>
 
 <input id="name" placeholder="Student Name">
-<input id="phone" placeholder="Parent Phone (e.g. 919876543210)">
+<input id="phone" placeholder="Parent Phone">
 <input id="course" placeholder="Course">
-<input id="fee" type="number" placeholder="Fee Amount">
+<input id="fee" type="number" placeholder="Fee">
 <input id="due" type="date">
 
 <button onclick="addStudent()">Add Student</button>
-<button onclick="downloadReport()">Download Fee Report</button>
+<button onclick="downloadReport()">Download Excel</button>
 
 <table>
 <thead>
@@ -211,11 +142,12 @@ Send reminders (0 overdue)
 <th>Phone</th>
 <th>Course</th>
 <th>Fee</th>
-<th>Late Fee</th>
+<th>Late</th>
 <th>Total</th>
 <th>Status</th>
 <th>Action</th>
 <th>Reminder</th>
+<th>QR</th>
 </tr>
 </thead>
 
@@ -233,16 +165,16 @@ import { getFirestore, collection, addDoc, getDocs, updateDoc, doc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
-authDomain: "student-fee-manager-98c51.firebaseapp.com",
-projectId: "student-fee-manager-98c51",
-storageBucket: "student-fee-manager-98c51.firebasestorage.app",
-messagingSenderId: "463103595080",
-appId: "1:463103595080:web:3f0e964edd906fb1d23e7d"
+apiKey:"AIzaSyDHJhlNzrAv5iPgvv5b2WmByfDczJCNkNY",
+authDomain:"student-fee-manager-98c51.firebaseapp.com",
+projectId:"student-fee-manager-98c51",
+storageBucket:"student-fee-manager-98c51.firebasestorage.app",
+messagingSenderId:"463103595080",
+appId:"1:463103595080:web:3f0e964edd906fb1d23e7d"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 let students=[];
 
@@ -250,12 +182,12 @@ async function loadStudents(){
 
 students=[];
 
-const querySnapshot = await getDocs(collection(db,"students"));
+const querySnapshot=await getDocs(collection(db,"students"));
 
 querySnapshot.forEach((docSnap)=>{
 
-let data = docSnap.data();
-data.id = docSnap.id;
+let data=docSnap.data();
+data.id=docSnap.id;
 students.push(data);
 
 });
@@ -266,23 +198,12 @@ render();
 
 async function addStudent(){
 
-let name=document.getElementById("name").value;
-let phone=document.getElementById("phone").value;
-let course=document.getElementById("course").value;
-let fee=document.getElementById("fee").value;
-let due=document.getElementById("due").value;
-
-if(!name || !phone || !fee || !due){
-alert("Please fill required fields");
-return;
-}
-
 let student={
-name:name,
-phone:phone,
-course:course,
-fee:fee,
-due:due,
+name:name.value,
+phone:phone.value,
+course:course.value,
+fee:fee.value,
+due:due.value,
 paid:false
 };
 
@@ -296,9 +217,45 @@ loadStudents();
 
 async function markPaid(id){
 
-const ref = doc(db,"students",id);
+const ref=doc(db,"students",id);
+
 await updateDoc(ref,{paid:true});
+
 loadStudents();
+
+}
+
+/* EDIT STUDENT */
+
+async function editStudent(id){
+
+let s=students.find(x=>x.id==id);
+
+let newPhone=prompt("Edit Phone",s.phone);
+let newFee=prompt("Edit Fee",s.fee);
+
+const ref=doc(db,"students",id);
+
+await updateDoc(ref,{
+phone:newPhone,
+fee:newFee
+});
+
+loadStudents();
+
+}
+
+/* QR PAYMENT */
+
+function paymentQR(name,amount){
+
+let upi="schoolfees@upi";
+
+let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
+
+let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+
+window.open(qr);
 
 }
 
@@ -311,15 +268,11 @@ let due=new Date(s.due);
 
 if(!s.paid && today>due){
 
-let diff=Math.floor((today-due)/(1000*60*60*24));
-let late=diff*10;
-let total=parseInt(s.fee)+late;
-
-let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+let msg=`Hello fee for ${s.name} ₹${s.fee}`;
 
 let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
 
-window.open(link,'_blank');
+window.open(link);
 
 }
 
@@ -329,21 +282,20 @@ window.open(link,'_blank');
 
 function downloadReport(){
 
-let csv="Name,Phone,Course,Fee,Due Date,Status\n";
+let csv="Name,Phone,Course,Fee,Due,Status\n";
 
-students.forEach((s)=>{
+students.forEach(s=>{
 
-let status=s.paid ? "Paid" : "Pending";
-csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${status}\n`;
+csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid?"Paid":"Pending"}\n`;
 
 });
 
-let blob=new Blob([csv],{type:"text/csv"});
+let blob=new Blob([csv]);
 let url=URL.createObjectURL(blob);
 
 let a=document.createElement("a");
 a.href=url;
-a.download="student_fee_report.csv";
+a.download="fees.csv";
 a.click();
 
 }
@@ -351,16 +303,16 @@ a.click();
 function render(){
 
 let tbody=document.getElementById("table");
-let mobileList=document.getElementById("mobileList");
+let mobile=document.getElementById("mobileList");
 
 tbody.innerHTML="";
-mobileList.innerHTML="";
+mobile.innerHTML="";
 
+let overdueCount=0;
 let collected=0;
 let pending=0;
-let overdueCount=0;
 
-students.forEach((s)=>{
+students.forEach(s=>{
 
 let today=new Date();
 let due=new Date(s.due);
@@ -369,26 +321,27 @@ let late=0;
 let status="Pending";
 
 if(!s.paid && today>due){
+
 let diff=Math.floor((today-due)/(1000*60*60*24));
 late=diff*10;
+
 status="Overdue";
 overdueCount++;
+
 }
 
-if(s.paid) status="Paid";
+if(s.paid)status="Paid";
 
 let total=parseInt(s.fee)+late;
 
-if(s.paid) collected+=total;
+if(s.paid)collected+=total;
 else pending+=total;
 
-let msg=`Hello, fee for ${s.name} amount ₹${s.fee} was due on ${s.due}. Total due ₹${total}. Please make payment.`;
+let link=`https://wa.me/${s.phone}`;
 
-let link=`https://wa.me/${s.phone}?text=`+encodeURIComponent(msg);
-
-let reminderCell = s.paid
-? '<span class="disabled-btn">Paid</span>'
-: `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
+let reminder=s.paid
+?'<span class="disabled-btn">Paid</span>'
+:`<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
 
 let row=`
 <tr>
@@ -398,58 +351,55 @@ let row=`
 <td>₹${s.fee}</td>
 <td>₹${late}</td>
 <td>₹${total}</td>
-<td class="${status==='Overdue'?'overdue':''}">${status}</td>
-<td><button onclick="markPaid('${s.id}')">Mark Paid</button></td>
-<td>${reminderCell}</td>
+<td class="${status=='Overdue'?'overdue':''}">${status}</td>
+<td>
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+</td>
+<td>${reminder}</td>
+<td><button onclick="paymentQR('${s.name}',${total})">QR</button></td>
 </tr>
 `;
 
 tbody.innerHTML+=row;
 
-let mobileReminder = s.paid
-? '<span class="disabled-btn">Paid</span>'
-: `<a class="whatsapp" target="_blank" href="${link}">Send</a>`;
+/* MOBILE */
 
-let card=`
+mobile.innerHTML+=`
 <div class="mobile-card">
 
 <h3>${s.name}</h3>
 
-Course: ${s.course}<br>
-Fee: ₹${s.fee}<br>
-Late Fee: ₹${late}<br>
-Total: ₹${total}<br>
-Status: <span class="${status==='Overdue'?'overdue':''}">${status}</span>
+Fee ₹${total}<br>
+Status <span class="${status=='Overdue'?'overdue':''}">${status}</span>
 
-<div class="mobile-actions">
+<br><br>
 
-<button onclick="markPaid('${s.id}')">Mark Paid</button>
-
-${mobileReminder}
-
-</div>
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="paymentQR('${s.name}',${total})">QR</button>
 
 </div>
 `;
 
-mobileList.innerHTML+=card;
-
 });
 
-document.getElementById("students").innerText="Students: "+students.length;
-document.getElementById("collected").innerText="Collected: ₹"+collected;
-document.getElementById("pending").innerText="Pending: ₹"+pending;
-document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+studentsDiv.innerText="Students: "+students.length;
+collectedDiv.innerText="Collected: ₹"+collected;
+pendingDiv.innerText="Pending: ₹"+pending;
+overdueDiv.innerText="Overdue: "+overdueCount;
 
-document.getElementById("reminderButton").innerText =
+document.getElementById("reminderButton").innerText=
 "Send reminders ("+overdueCount+" overdue)";
 
 }
 
-window.addStudent = addStudent;
-window.sendReminders = sendReminders;
-window.markPaid = markPaid;
-window.downloadReport = downloadReport;
+window.addStudent=addStudent;
+window.markPaid=markPaid;
+window.editStudent=editStudent;
+window.paymentQR=paymentQR;
+window.sendReminders=sendReminders;
+window.downloadReport=downloadReport;
 
 loadStudents();
 
