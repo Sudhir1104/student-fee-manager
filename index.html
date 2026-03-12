@@ -24,7 +24,6 @@ border-radius:10px;
 padding:15px 20px;
 margin-bottom:20px;
 color:white;
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 .logo-row{
@@ -59,6 +58,8 @@ border-radius:10px;
 box-shadow:0 3px 12px rgba(0,0,0,0.15);
 }
 
+/* INPUTS */
+
 input,button{
 padding:10px;
 margin:5px 0;
@@ -81,6 +82,8 @@ background:#1b5fbf;
 .reminder-btn{
 background:#e53935;
 }
+
+/* STATUS */
 
 .overdue{
 color:#e53935;
@@ -125,7 +128,7 @@ padding:8px;
 border-bottom:1px solid #ddd;
 }
 
-/* MOBILE CARD */
+/* MOBILE CARDS */
 
 .mobile-card{
 background:#f8f8f8;
@@ -188,7 +191,7 @@ color:#666;
 </div>
 
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
-Send reminders (0 overdue)
+Send reminders
 </button>
 
 <input id="name" placeholder="Student Name">
@@ -250,11 +253,15 @@ const db=getFirestore(app);
 
 let students=[];
 
+/* PHONE CLEAN */
+
 function cleanPhone(phone){
 phone=phone.replace(/\D/g,'');
 if(!phone.startsWith("91")) phone="91"+phone;
 return phone;
 }
+
+/* REMINDER */
 
 function sendReminder(phone,name,total){
 
@@ -271,6 +278,8 @@ let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent
 window.open(url,'_blank');
 
 }
+
+/* RECEIPT */
 
 function sendReceipt(phone,name,amount,receipt,date){
 
@@ -291,6 +300,8 @@ window.open(url,'_blank');
 
 }
 
+/* LOAD */
+
 async function loadStudents(){
 
 students=[];
@@ -306,6 +317,8 @@ students.push(data);
 render();
 
 }
+
+/* ADD */
 
 async function addStudent(){
 
@@ -326,6 +339,8 @@ loadStudents();
 
 }
 
+/* MARK PAID */
+
 async function markPaid(id){
 
 let receipt="RCPT-"+Date.now();
@@ -341,6 +356,8 @@ loadStudents();
 
 }
 
+/* DELETE */
+
 async function deleteStudent(id){
 
 if(!confirm("Delete this student?")) return;
@@ -350,6 +367,8 @@ await deleteDoc(doc(db,"students",id));
 loadStudents();
 
 }
+
+/* EDIT */
 
 async function editStudent(id){
 
@@ -367,6 +386,8 @@ loadStudents();
 
 }
 
+/* QR */
+
 function paymentQR(name,amount){
 
 let upi="schoolfees@upi";
@@ -378,6 +399,8 @@ let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeUR
 window.open(qr,'_blank');
 
 }
+
+/* BULK REMINDERS */
 
 function sendReminders(){
 
@@ -393,6 +416,8 @@ sendReminder(s.phone,s.name,s.fee);
 });
 
 }
+
+/* EXPORT */
 
 function downloadReport(){
 
@@ -411,6 +436,8 @@ a.download="fees.csv";
 a.click();
 
 }
+
+/* RENDER */
 
 function render(){
 
@@ -451,7 +478,7 @@ let reminder=s.paid
 :`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
 
 let receipt=s.paid
-?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber}','${s.paidDate}')">Send Receipt</button>`
+?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber}','${s.paidDate}')">Resend Receipt</button>`
 :"";
 
 tbody.innerHTML+=`
@@ -474,14 +501,38 @@ tbody.innerHTML+=`
 </tr>
 `;
 
+mobile.innerHTML+=`
+<div class="mobile-card">
+
+<h3>${s.name}</h3>
+
+Course: ${s.course}<br>
+Fee: ₹${total}<br>
+Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
+
+<br><br>
+
+<button onclick="editStudent('${s.id}')">Edit</button>
+<button onclick="markPaid('${s.id}')">Paid</button>
+<button onclick="deleteStudent('${s.id}')">Delete</button>
+
+<br><br>
+
+${reminder}
+
+<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
+
+${receipt}
+
+</div>
+`;
+
 });
 
 document.getElementById("students").innerText="Students: "+students.length;
 document.getElementById("collected").innerText="Collected: ₹"+collected;
 document.getElementById("pending").innerText="Pending: ₹"+pending;
 document.getElementById("overdue").innerText="Overdue: "+overdueCount;
-
-document.getElementById("reminderButton").innerText="Send reminders ("+overdueCount+" overdue)";
 
 }
 
