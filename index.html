@@ -169,8 +169,6 @@ const db=getFirestore(app);
 
 let students=[];
 
-/* PHONE CLEAN */
-
 function cleanPhone(phone){
 
 phone=phone.replace(/\D/g,'');
@@ -183,13 +181,17 @@ return phone;
 
 }
 
-/* REMINDER FUNCTION */
+/* REMINDER MESSAGE */
 
 function sendReminder(phone,name,total){
 
 phone=cleanPhone(phone);
 
-let message="Hello, fee for "+name+" is ₹"+total+". Please make payment.";
+let message=
+"Dear Parent,\n\n"+
+"Fee for "+name+" is overdue.\n"+
+"Please make payment immediately.\n\n"+
+"Srishti Centre for Performing Arts";
 
 let whatsappURL="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
 
@@ -209,8 +211,6 @@ window.open(whatsappURL,'_blank');
 
 }
 
-/* LOAD */
-
 async function loadStudents(){
 
 students=[];
@@ -228,8 +228,6 @@ students.push(data);
 render();
 
 }
-
-/* ADD */
 
 async function addStudent(){
 
@@ -250,8 +248,6 @@ loadStudents();
 
 }
 
-/* MARK PAID */
-
 async function markPaid(id){
 
 await updateDoc(doc(db,"students",id),{paid:true});
@@ -259,8 +255,6 @@ await updateDoc(doc(db,"students",id),{paid:true});
 loadStudents();
 
 }
-
-/* DELETE */
 
 async function deleteStudent(id){
 
@@ -271,8 +265,6 @@ await deleteDoc(doc(db,"students",id));
 loadStudents();
 
 }
-
-/* EDIT */
 
 async function editStudent(id){
 
@@ -290,8 +282,6 @@ loadStudents();
 
 }
 
-/* QR */
-
 function paymentQR(name,amount){
 
 let upi="schoolfees@upi";
@@ -303,8 +293,6 @@ let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeUR
 window.open(qr,'_blank');
 
 }
-
-/* BULK REMINDER */
 
 function sendReminders(){
 
@@ -322,8 +310,6 @@ sendReminder(s.phone,s.name,s.fee);
 });
 
 }
-
-/* EXPORT */
 
 function downloadReport(){
 
@@ -344,8 +330,6 @@ a.download="fees.csv";
 a.click();
 
 }
-
-/* RENDER */
 
 function render(){
 
