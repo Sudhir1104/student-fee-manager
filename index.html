@@ -96,6 +96,7 @@ margin:5px 0;
 width:100%;
 border-radius:6px;
 border:1px solid #ccc;
+box-sizing: border-box;
 }
 
 button{
@@ -123,6 +124,8 @@ background:#ccc;
 color:#666;
 padding:6px 10px;
 border-radius:5px;
+display: inline-block;
+width: auto;
 }
 
 .dashboard{
@@ -150,6 +153,7 @@ margin-top:20px;
 th,td{
 padding:8px;
 border-bottom:1px solid #ddd;
+text-align: left;
 }
 
 .mobile-card{
@@ -231,7 +235,7 @@ color:#666;
 <div class="header-row">
 
 <div class="logo-row">
-<img src="logo.png">
+<img src="logo.png" alt="Logo" onerror="this.style.display='none'">
 <div class="title-block">
 <h1>Srishti Centre for Performing Arts</h1>
 <h2>Student Fee Manager</h2>
@@ -255,13 +259,13 @@ color:#666;
 </div>
 
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
-Send reminders
+📩 Send Fine Notice to All Overdue Students
 </button>
 
 <!-- Search Bar -->
 <div class="search-wrapper">
 <span class="search-icon">🔍</span>
-<input id="searchInput" placeholder="Search student by name..." oninput="render()">
+<input id="searchInput" placeholder="Search student by name..." onkeyup="render()">
 </div>
 
 <input id="name" placeholder="Student Name">
@@ -324,6 +328,9 @@ const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const auth=getAuth(app);
 
+// Global students array
+let students=[];
+
 // Auth guard – redirect to login if not signed in
 onAuthStateChanged(auth,(user)=>{
   if(!user){
@@ -347,25 +354,22 @@ return phone;
 }
 
 function sendReminder(phone,name,total){
-
 phone=cleanPhone(phone);
-
 let message=
 "Dear Parent,\n\n"+
-"Fee for "+name+" ₹"+total+" is overdue.\n"+
-"Please make payment immediately.\n\n"+
+"This is a reminder that the fee for *"+name+"* is overdue.\n\n"+
+"Fee: ₹"+(total-100)+"\n"+
+"Late Fine: ₹100\n"+
+"Total Due: ₹"+total+"\n\n"+
+"Please make payment immediately to avoid further penalties.\n\n"+
 "Srishti Centre for Performing Arts";
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
-
 window.open(url,'_blank');
-
 }
 
 function sendReceipt(phone,name,amount,receipt,date){
-
 phone=cleanPhone(phone);
-
 let message=
 "Srishti Centre for Performing Arts\n\n"+
 "RECEIPT\n\n"+
@@ -376,274 +380,318 @@ let message=
 "Thank you for your payment.";
 
 let url="https://api.whatsapp.com/send?phone="+phone+"&text="+encodeURIComponent(message);
-
 window.open(url,'_blank');
-
 }
 
 async function loadStudents(){
-
-students=[];
-
-const querySnapshot=await getDocs(collection(db,"students"));
-
-querySnapshot.forEach((docSnap)=>{
-let data=docSnap.data();
-data.id=docSnap.id;
-students.push(data);
-});
-
-render();
-
+try {
+  students = [];
+  const querySnapshot = await getDocs(collection(db, "students"));
+  
+  querySnapshot.forEach((docSnap) => {
+    let data = docSnap.data();
+    data.id = docSnap.id;
+    students.push(data);
+  });
+  
+  render();
+} catch (error) {
+  console.error("Error loading students:", error);
+  alert("Error loading students. Please check console for details.");
+}
 }
 
 async function addStudent(){
-
-let student={
-name:document.getElementById("name").value,
-phone:cleanPhone(document.getElementById("phone").value),
-course:document.getElementById("course").value,
-fee:document.getElementById("fee").value,
-due:document.getElementById("due").value,
-paid:false
-};
-
-await addDoc(collection(db,"students"),student);
-
-document.querySelectorAll("input").forEach(i=>i.value="");
-
-loadStudents();
-
+try {
+  // Validate inputs
+  let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  let course = document.getElementById("course").value.trim();
+  let fee = document.getElementById("fee").value;
+  let due = document.getElementById("due").value;
+  
+  if (!name || !phone || !course || !fee || !due) {
+    alert("Please fill in all fields");
+    return;
+  }
+  
+  let student = {
+    name: name,
+    phone: cleanPhone(phone),
+    course: course,
+    fee: fee,
+    due: due,
+    paid: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  await addDoc(collection(db, "students"), student);
+  
+  // Clear inputs
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("course").value = "";
+  document.getElementById("fee").value = "";
+  document.getElementById("due").value = "";
+  
+  await loadStudents();
+  alert("Student added successfully!");
+  
+} catch (error) {
+  console.error("Error adding student:", error);
+  alert("Error adding student. Please try again.");
+}
 }
 
 async function markPaid(id){
-
-let receipt="RCPT-"+Date.now();
-let date=new Date().toISOString().slice(0,10);
-
-await updateDoc(doc(db,"students",id),{
-paid:true,
-receiptNumber:receipt,
-paidDate:date
-});
-
-alert("Payment recorded. Receipt No: "+receipt);
-
-loadStudents();
-
+try {
+  let receipt = "RCPT-" + Date.now();
+  let date = new Date().toISOString().slice(0,10);
+  
+  await updateDoc(doc(db, "students", id), {
+    paid: true,
+    receiptNumber: receipt,
+    paidDate: date
+  });
+  
+  alert("Payment recorded. Receipt No: " + receipt);
+  await loadStudents();
+  
+} catch (error) {
+  console.error("Error marking as paid:", error);
+  alert("Error recording payment. Please try again.");
+}
 }
 
 async function deleteStudent(id){
-
 if(!confirm("Delete this student?")) return;
 
-await deleteDoc(doc(db,"students",id));
-
-loadStudents();
-
+try {
+  await deleteDoc(doc(db, "students", id));
+  await loadStudents();
+  alert("Student deleted successfully!");
+} catch (error) {
+  console.error("Error deleting student:", error);
+  alert("Error deleting student. Please try again.");
+}
 }
 
 async function editStudent(id){
-
-let s=students.find(x=>x.id==id);
-
-let newPhone=prompt("Edit phone",s.phone);
-let newFee=prompt("Edit fee",s.fee);
-
-await updateDoc(doc(db,"students",id),{
-phone:cleanPhone(newPhone),
-fee:newFee
-});
-
-loadStudents();
-
+try {
+  let s = students.find(x => x.id == id);
+  if (!s) return;
+  
+  let newPhone = prompt("Edit phone (with country code)", s.phone);
+  if (newPhone === null) return;
+  
+  let newFee = prompt("Edit fee amount", s.fee);
+  if (newFee === null) return;
+  
+  await updateDoc(doc(db, "students", id), {
+    phone: cleanPhone(newPhone),
+    fee: newFee
+  });
+  
+  await loadStudents();
+  alert("Student updated successfully!");
+  
+} catch (error) {
+  console.error("Error editing student:", error);
+  alert("Error updating student. Please try again.");
+}
 }
 
 function paymentQR(name,amount){
-
-let upi="61407789476@icici";
-
-let url=`upi://pay?pa=${upi}&pn=${name}&am=${amount}`;
-
-let qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-
+let upi = "61407789476@icici";
+let url = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&am=${amount}`;
+let qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
 window.open(qr,'_blank');
-
 }
 
 function sendReminders(){
+let count = 0;
+let today = new Date();
+today.setHours(0,0,0,0); // Normalize time for comparison
 
 students.forEach((s)=>{
-
-let today=new Date();
-let due=new Date(s.due);
-
-if(!s.paid && today>due){
-sendReminder(s.phone,s.name,s.fee);
-}
-
+  if (!s.paid) {
+    let due = new Date(s.due);
+    due.setHours(0,0,0,0);
+    
+    if (today > due) {
+      let total = parseInt(s.fee) + 100;
+      sendReminder(s.phone, s.name, total);
+      count++;
+    }
+  }
 });
 
+if(count===0) alert("No overdue students found.");
 }
 
 function downloadReport(){
-
-let csv="Name,Phone,Course,Fee,Due,Status\n";
+let csv = "Name,Phone,Course,Fee,Due Date,Status,Receipt Number,Paid Date\n";
 
 students.forEach(s=>{
-csv+=`${s.name},${s.phone},${s.course},${s.fee},${s.due},${s.paid?"Paid":"Pending"}\n`;
+  let status = s.paid ? "Paid" : "Pending";
+  let today = new Date();
+  let due = new Date(s.due);
+  if (!s.paid && today > due) status = "Overdue";
+  
+  csv += `"${s.name}","${s.phone}","${s.course}","${s.fee}","${s.due}","${status}","${s.receiptNumber || ''}","${s.paidDate || ''}"\n`;
 });
 
-let blob=new Blob([csv]);
-let url=URL.createObjectURL(blob);
+let blob = new Blob([csv], { type: 'text/csv' });
+let url = URL.createObjectURL(blob);
 
-let a=document.createElement("a");
-a.href=url;
-a.download="fees.csv";
+let a = document.createElement("a");
+a.href = url;
+a.download = "student_fees_report.csv";
 a.click();
 
+URL.revokeObjectURL(url);
 }
 
 function render(){
+let tbody = document.getElementById("table");
+let mobile = document.getElementById("mobileList");
 
-let tbody=document.getElementById("table");
-let mobile=document.getElementById("mobileList");
+if (!tbody || !mobile) return;
 
-tbody.innerHTML="";
-mobile.innerHTML="";
+tbody.innerHTML = "";
+mobile.innerHTML = "";
 
-let overdueCount=0;
-let collected=0;
-let pending=0;
+let overdueCount = 0;
+let collected = 0;
+let pending = 0;
+let today = new Date();
+today.setHours(0,0,0,0);
 
 // Get search query
-let query=document.getElementById("searchInput").value.trim().toLowerCase();
+let query = document.getElementById("searchInput").value.trim().toLowerCase();
 
 // Filter students by name
-let filtered=query
-? students.filter(s=>s.name.toLowerCase().includes(query))
-: students;
+let filtered = query
+  ? students.filter(s => s.name && s.name.toLowerCase().includes(query))
+  : students;
 
-if(filtered.length===0 && query){
-tbody.innerHTML=`<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
-mobile.innerHTML=`<div class="no-results">No student found matching "${query}"</div>`;
-}
-
-// Dashboard counts use ALL students (not filtered)
-students.forEach(s=>{
-
-let today=new Date();
-let due=new Date(s.due);
-let late=0;
-
-if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
-overdueCount++;
-}
-
-let total=parseInt(s.fee)+late;
-
-if(s.paid)collected+=total;
-else pending+=total;
-
+// Dashboard calculations using ALL students
+students.forEach(s => {
+  let due = new Date(s.due);
+  due.setHours(0,0,0,0);
+  let late = (!s.paid && today > due) ? 100 : 0;
+  let total = parseInt(s.fee || 0) + late;
+  
+  if (s.paid) {
+    collected += total;
+  } else {
+    pending += total;
+    if (today > due) overdueCount++;
+  }
 });
 
-// Render only filtered students in table/mobile
-filtered.forEach(s=>{
+// Update dashboard
+document.getElementById("students").innerText = "Students: " + students.length;
+document.getElementById("collected").innerHTML = "Collected: ₹" + collected;
+document.getElementById("pending").innerHTML = "Pending: ₹" + pending;
+document.getElementById("overdue").innerHTML = "Overdue: " + overdueCount;
 
-let today=new Date();
-let due=new Date(s.due);
-
-let late=0;
-let status="Pending";
-
-if(!s.paid && today>due){
-let diff=Math.floor((today-due)/(1000*60*60*24));
-late=diff*10;
-status="Overdue";
+// Show no results message if needed
+if (filtered.length === 0 && query) {
+  let noResultsMsg = `<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
+  tbody.innerHTML = noResultsMsg;
+  mobile.innerHTML = `<div class="no-results">No student found matching "${query}"</div>`;
 }
 
-if(s.paid)status="Paid";
-
-let total=parseInt(s.fee)+late;
-
-let reminder=s.paid
-?'<span class="disabled-btn">Paid</span>'
-:`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
-
-let receipt=s.paid
-?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
-:"";
-
-tbody.innerHTML+=`
+// Render filtered students
+filtered.forEach(s => {
+  let due = new Date(s.due);
+  due.setHours(0,0,0,0);
+  
+  let late = (!s.paid && today > due) ? 100 : 0;
+  let status = "Pending";
+  
+  if (s.paid) {
+    status = "Paid";
+  } else if (today > due) {
+    status = "Overdue";
+  }
+  
+  let total = parseInt(s.fee || 0) + late;
+  
+  // Escape special characters for HTML attributes
+  let safePhone = (s.phone || '').replace(/'/g, "&apos;");
+  let safeName = (s.name || '').replace(/'/g, "&apos;");
+  let safeReceipt = (s.receiptNumber || 'N/A').replace(/'/g, "&apos;");
+  let safePaidDate = (s.paidDate || '').replace(/'/g, "&apos;");
+  
+  // Reminder button
+  let reminder = s.paid
+    ? '<span class="disabled-btn">Paid</span>'
+    : `<button onclick="sendReminder('${safePhone}','${safeName}','${total}')">Reminder</button>`;
+  
+  // Receipt button
+  let receipt = s.paid
+    ? `<button onclick="sendReceipt('${safePhone}','${safeName}','${total}','${safeReceipt}','${safePaidDate}')">Resend Receipt</button>`
+    : "";
+  
+  // Table row
+  tbody.innerHTML += `
 <tr>
-<td>${s.name}</td>
-<td>${s.phone}</td>
-<td>${s.course}</td>
-<td>₹${s.fee}</td>
-<td>₹${late}</td>
-<td>₹${total}</td>
-<td class="${status=='Overdue'?'overdue':''}">${status}</td>
-<td>
-<button onclick="editStudent('${s.id}')">Edit</button>
-<button onclick="markPaid('${s.id}')">Paid</button>
-<button onclick="deleteStudent('${s.id}')">Delete</button>
-</td>
-<td>${reminder}</td>
-<td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
-<td>${receipt}</td>
+  <td>${s.name || ''}</td>
+  <td>${s.phone || ''}</td>
+  <td>${s.course || ''}</td>
+  <td>₹${s.fee || 0}</td>
+  <td>₹${late}</td>
+  <td>₹${total}</td>
+  <td class="${status == 'Overdue' ? 'overdue' : ''}">${status}</td>
+  <td>
+    <button onclick="editStudent('${s.id}')">Edit</button>
+    <button onclick="markPaid('${s.id}')">Paid</button>
+    <button onclick="deleteStudent('${s.id}')">Delete</button>
+  </td>
+  <td>${reminder}</td>
+  <td><button onclick="paymentQR('${safeName}',${total})">QR Pay</button></td>
+  <td>${receipt}</td>
 </tr>
 `;
-
-mobile.innerHTML+=`
+  
+  // Mobile card
+  mobile.innerHTML += `
 <div class="mobile-card">
-
-<h3>${s.name}</h3>
-
-Course: ${s.course}<br>
-Fee: ₹${total}<br>
-Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
-
-<br><br>
-
-<button onclick="editStudent('${s.id}')">Edit</button>
-<button onclick="markPaid('${s.id}')">Paid</button>
-<button onclick="deleteStudent('${s.id}')">Delete</button>
-
-<br><br>
-
-${reminder}
-
-<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
-
-${receipt}
-
+  <h3>${s.name || ''}</h3>
+  <strong>Course:</strong> ${s.course || ''}<br>
+  <strong>Phone:</strong> ${s.phone || ''}<br>
+  <strong>Fee:</strong> ₹${s.fee || 0}<br>
+  <strong>Late:</strong> ₹${late}<br>
+  <strong>Total:</strong> ₹${total}<br>
+  <strong>Status:</strong> <span class="${status == 'Overdue' ? 'overdue' : ''}">${status}</span><br>
+  <strong>Due Date:</strong> ${s.due || ''}<br><br>
+  
+  <button onclick="editStudent('${s.id}')">Edit</button>
+  <button onclick="markPaid('${s.id}')">Paid</button>
+  <button onclick="deleteStudent('${s.id}')">Delete</button>
+  <br><br>
+  ${reminder}
+  <button onclick="paymentQR('${safeName}',${total})">QR Pay</button>
+  ${receipt}
 </div>
 `;
-
 });
-
-document.getElementById("students").innerText="Students: "+students.length;
-document.getElementById("collected").innerText="Collected: ₹"+collected;
-document.getElementById("pending").innerText="Pending: ₹"+pending;
-document.getElementById("overdue").innerText="Overdue: "+overdueCount;
-
 }
 
-window.addStudent=addStudent;
-window.markPaid=markPaid;
-window.deleteStudent=deleteStudent;
-window.editStudent=editStudent;
-window.paymentQR=paymentQR;
-window.sendReminder=sendReminder;
-window.sendReminders=sendReminders;
-window.sendReceipt=sendReceipt;
-window.downloadReport=downloadReport;
-window.render=render;
-window.logout=logout;
-
-let students=[];
+// Make functions globally available
+window.addStudent = addStudent;
+window.markPaid = markPaid;
+window.deleteStudent = deleteStudent;
+window.editStudent = editStudent;
+window.paymentQR = paymentQR;
+window.sendReminder = sendReminder;
+window.sendReminders = sendReminders;
+window.sendReceipt = sendReceipt;
+window.downloadReport = downloadReport;
+window.render = render;
+window.logout = logout;
 
 </script>
 
