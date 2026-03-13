@@ -5,7 +5,14 @@
 <title>Srishti Centre Fee Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Srishti Fees">
+<meta name="theme-color" content="#2d89ef">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 
 <style>
 
@@ -219,6 +226,111 @@ font-size:13px;
 color:#666;
 }
 
+/* Import modal */
+.modal-overlay{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.5);
+z-index:1000;
+justify-content:center;
+align-items:center;
+}
+
+.modal-overlay.active{
+display:flex;
+}
+
+.modal{
+background:white;
+border-radius:12px;
+padding:25px;
+width:90%;
+max-width:700px;
+max-height:80vh;
+overflow-y:auto;
+box-shadow:0 8px 30px rgba(0,0,0,0.2);
+}
+
+.modal h3{
+margin:0 0 15px 0;
+color:#2d89ef;
+}
+
+.modal-hint{
+background:#f0f7ff;
+border:1px solid #c5e0fb;
+border-radius:6px;
+padding:10px 14px;
+font-size:13px;
+color:#555;
+margin-bottom:15px;
+}
+
+.modal-hint code{
+background:#ddeeff;
+padding:1px 5px;
+border-radius:3px;
+font-size:12px;
+}
+
+.import-table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+margin-bottom:15px;
+}
+
+.import-table th{
+background:#2d89ef;
+color:white;
+padding:8px;
+text-align:left;
+}
+
+.import-table td{
+padding:7px 8px;
+border-bottom:1px solid #eee;
+}
+
+.import-table tr:nth-child(even){
+background:#f9f9f9;
+}
+
+.modal-actions{
+display:flex;
+gap:10px;
+}
+
+.modal-actions button{
+flex:1;
+}
+
+.cancel-btn{
+background:#888 !important;
+}
+
+.cancel-btn:hover{
+background:#666 !important;
+}
+
+.import-btn-green{
+background:#2e7d32 !important;
+}
+
+.import-btn-green:hover{
+background:#1b5e20 !important;
+}
+
+.import-file-btn{
+background:#ff9800;
+}
+
+.import-file-btn:hover{
+background:#e65100 !important;
+}
+
 </style>
 </head>
 
@@ -271,7 +383,25 @@ color:#666;
 <input id="due" type="date">
 
 <button onclick="addStudent()">Add Student</button>
-<button onclick="downloadReport()">Download Excel</button>
+<button onclick="downloadReport()">⬇ Download Excel</button>
+<input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)">
+<button class="import-file-btn" onclick="document.getElementById('importFile').click()">📂 Import from Excel</button>
+
+<!-- Import Preview Modal -->
+<div class="modal-overlay" id="importModal">
+<div class="modal">
+<h3>📋 Preview Import</h3>
+<div class="modal-hint">
+  Columns detected from your file. Please confirm before importing.<br><br>
+  Expected columns: <code>Name</code> <code>Phone</code> <code>Course</code> <code>Fee</code> <code>Due</code>
+</div>
+<div id="importPreview"></div>
+<div class="modal-actions">
+  <button class="cancel-btn" onclick="closeImportModal()">✕ Cancel</button>
+  <button class="import-btn-green" onclick="confirmImport()">✅ Import All Students</button>
+</div>
+</div>
+</div>
 
 <table>
 
@@ -303,6 +433,7 @@ color:#666;
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -638,6 +769,110 @@ document.getElementById("overdue").innerText="Overdue: "+overdueCount;
 
 }
 
+// ── Excel Import ──────────────────────────────
+let importedRows=[];
+
+function handleImport(event){
+  let file=event.target.files[0];
+  if(!file) return;
+
+  let reader=new FileReader();
+
+  reader.onload=function(e){
+    let data=new Uint8Array(e.target.result);
+    let workbook=XLSX.read(data,{type:'array'});
+    let sheet=workbook.Sheets[workbook.SheetNames[0]];
+    let rows=XLSX.utils.sheet_to_json(sheet,{defval:""});
+
+    if(rows.length===0){
+      alert("No data found in the file.");
+      return;
+    }
+
+    // Flexible column mapping (case insensitive)
+    importedRows=rows.map(r=>{
+      let keys=Object.keys(r);
+      function find(keywords){
+        let k=keys.find(k=>keywords.some(kw=>k.toLowerCase().includes(kw)));
+        return k ? String(r[k]).trim() : "";
+      }
+
+      let phone=find(["phone","mobile","contact","number"]);
+      let due=find(["due","date","deadline"]);
+
+      // Convert Excel serial date if needed
+      if(due && !isNaN(due)){
+        let d=XLSX.SSF.parse_date_code(parseInt(due));
+        due=`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+      }
+
+      return {
+        name: find(["name","student"]),
+        phone: cleanPhone(phone||"0000000000"),
+        course: find(["course","class","subject","program"]),
+        fee: find(["fee","amount","fees"]),
+        due: due,
+        paid: false
+      };
+    }).filter(r=>r.name);
+
+    if(importedRows.length===0){
+      alert("Could not read student data. Check your column names:\nName, Phone, Course, Fee, Due");
+      return;
+    }
+
+    // Show preview
+    let html=`<table class="import-table">
+      <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Course</th><th>Fee</th><th>Due Date</th></tr></thead>
+      <tbody>`;
+
+    importedRows.forEach((r,i)=>{
+      html+=`<tr>
+        <td>${i+1}</td>
+        <td>${r.name}</td>
+        <td>${r.phone}</td>
+        <td>${r.course||"—"}</td>
+        <td>₹${r.fee||"0"}</td>
+        <td>${r.due||"—"}</td>
+      </tr>`;
+    });
+
+    html+=`</tbody></table>
+    <p style="font-size:13px;color:#555;margin:0 0 10px">
+      <strong>${importedRows.length} students</strong> ready to import.
+    </p>`;
+
+    document.getElementById("importPreview").innerHTML=html;
+    document.getElementById("importModal").classList.add("active");
+  };
+
+  reader.readAsArrayBuffer(file);
+  event.target.value=""; // reset so same file can be re-selected
+}
+
+function closeImportModal(){
+  document.getElementById("importModal").classList.remove("active");
+  importedRows=[];
+}
+
+async function confirmImport(){
+  if(importedRows.length===0) return;
+
+  let btn=document.querySelector(".import-btn-green");
+  btn.disabled=true;
+  btn.textContent="Importing...";
+
+  let count=0;
+  for(let student of importedRows){
+    await addDoc(collection(db,"students"),student);
+    count++;
+  }
+
+  closeImportModal();
+  alert(`✅ Successfully imported ${count} students!`);
+  loadStudents();
+}
+
 window.addStudent=addStudent;
 window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
@@ -649,9 +884,21 @@ window.sendReceipt=sendReceipt;
 window.downloadReport=downloadReport;
 window.render=render;
 window.logout=logout;
+window.handleImport=handleImport;
+window.closeImportModal=closeImportModal;
+window.confirmImport=confirmImport;
 
 let students=[];
 
+</script>
+
+<!-- Register Service Worker -->
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("/sw.js")
+    .then(()=> console.log("SW registered"))
+    .catch(e=> console.log("SW error",e));
+}
 </script>
 
 </body>
