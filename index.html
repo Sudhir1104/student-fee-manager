@@ -722,6 +722,9 @@ tbody.innerHTML=`<tr><td colspan="11" class="no-results">No student found matchi
 mobile.innerHTML=`<div class="no-results">No student found matching "${query}"</div>`;
 }
 
+// Safe number parser
+function safeFee(val){ let n=parseInt(val); return isNaN(n)?0:n; }
+
 // Dashboard counts use ALL students (not filtered)
 students.forEach(s=>{
 
@@ -734,7 +737,7 @@ late=100;
 overdueCount++;
 }
 
-let total=parseInt(s.fee)+late;
+let total=safeFee(s.fee)+late;
 
 if(s.paid)collected+=total;
 else pending+=total;
@@ -757,7 +760,7 @@ status="Overdue";
 
 if(s.paid)status="Paid";
 
-let total=parseInt(s.fee)+late;
+let total=safeFee(s.fee)+late;
 
 let reminder=s.paid
 ?'<span class="disabled-btn">Paid</span>'
@@ -776,7 +779,9 @@ tbody.innerHTML+=`
 <td>
   <strong>${s.name}</strong>
   <div style="font-size:11px;color:#888;margin-top:2px;">Due: ${dueFormatted}</div>
-  ${s.paid && paidFormatted ? `<div style="font-size:11px;color:#2e7d32;margin-top:1px;">Paid: ${paidFormatted}</div>` : ''}
+  ${s.paid && paidFormatted ? `<div style="font-size:11px;color:#2e7d32;margin-top:1px;">✅ Paid: ${paidFormatted}</div>` : ''}
+  ${status=='Overdue' ? `<div style="font-size:11px;font-weight:bold;color:white;background:#c62828;padding:2px 7px;border-radius:4px;display:inline-block;margin-top:3px;letter-spacing:0.5px;">⚠ OVERDUE</div>` : ''}
+  ${status=='Pending' ? `<div style="font-size:11px;color:#e65100;margin-top:2px;">⏳ Payment pending</div>` : ''}
 </td>
 <td>${s.phone}</td>
 <td>${s.course}</td>
@@ -799,7 +804,10 @@ mobile.innerHTML+=`
 <div class="mobile-card">
 
 <h3>${s.name}</h3>
-<div style="font-size:12px;color:#888;margin-top:-6px;margin-bottom:6px;">Due: ${dueFormatted}${s.paid && paidFormatted ? ' · Paid: '+paidFormatted : ''}</div>
+<div style="font-size:12px;color:#888;margin-top:-6px;margin-bottom:4px;">Due: ${dueFormatted}</div>
+${s.paid && paidFormatted ? `<div style="font-size:12px;color:#2e7d32;margin-bottom:4px;">✅ Paid: ${paidFormatted}</div>` : ''}
+${status=='Overdue' ? `<div style="font-size:12px;font-weight:bold;color:white;background:#c62828;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:6px;letter-spacing:0.5px;">⚠ OVERDUE</div>` : ''}
+${status=='Pending' ? `<div style="font-size:12px;color:#e65100;margin-bottom:4px;">⏳ Payment pending</div>` : ''}
 
 Course: ${s.course}<br>
 Fee: ₹${total}<br>
