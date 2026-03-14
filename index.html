@@ -367,6 +367,14 @@ background:#ff9800;
 background:#e65100 !important;
 }
 
+.update-due-btn{
+background:#7b1fa2;
+}
+
+.update-due-btn:hover{
+background:#4a0072 !important;
+}
+
 </style>
 </head>
 
@@ -423,6 +431,26 @@ background:#e65100 !important;
 <button onclick="downloadReport()">⬇ Download Excel</button>
 <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)">
 <button class="import-file-btn" onclick="document.getElementById('importFile').click()">📂 Import from Excel</button>
+<button class="update-due-btn" onclick="showUpdateDueModal()">📅 Update All Due Dates</button>
+
+<!-- Update Due Date Modal -->
+<div class="modal-overlay" id="updateDueModal">
+<div class="modal">
+<h3>📅 Update Due Date for All Students</h3>
+<div class="modal-hint">
+  This will update the due date for <strong>all students</strong> at once.<br>
+  Useful for setting the monthly payment deadline.
+</div>
+<div class="admin-field" style="margin-bottom:15px;">
+  <label style="font-size:13px;font-weight:bold;color:#555;display:block;margin-bottom:6px;">Select New Due Date</label>
+  <input type="date" id="bulkDueDate" style="padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:15px;width:100%;">
+</div>
+<div class="modal-actions">
+  <button class="cancel-btn" onclick="closeUpdateDueModal()">✕ Cancel</button>
+  <button class="import-btn-green" onclick="confirmUpdateDue()">✅ Update All Students</button>
+</div>
+</div>
+</div>
 
 <!-- Import Preview Modal -->
 <div class="modal-overlay" id="importModal">
@@ -970,6 +998,42 @@ function setDashFilter(filter){
   render();
 }
 
+// ── Update all due dates ──────────────────────────────────────────────
+function showUpdateDueModal(){
+  // Default to 10th of current month
+  let today = new Date();
+  let y = today.getFullYear();
+  let m = String(today.getMonth()+1).padStart(2,'0');
+  document.getElementById('bulkDueDate').value = `${y}-${m}-10`;
+  document.getElementById('updateDueModal').classList.add('active');
+}
+
+function closeUpdateDueModal(){
+  document.getElementById('updateDueModal').classList.remove('active');
+}
+
+async function confirmUpdateDue(){
+  let newDue = document.getElementById('bulkDueDate').value;
+  if(!newDue){ alert('Please select a date'); return; }
+
+  let btn = document.querySelector('#updateDueModal .import-btn-green');
+  btn.disabled = true;
+  btn.textContent = 'Updating…';
+
+  let count = 0;
+  for(let s of students){
+    await updateDoc(doc(db,"students",s.id),{ due: newDue });
+    count++;
+  }
+
+  closeUpdateDueModal();
+  alert(`✅ Due date updated to ${new Date(newDue).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} for ${count} students!`);
+  loadStudents();
+
+  btn.disabled = false;
+  btn.textContent = '✅ Update All Students';
+}
+
 window.addStudent=addStudent;
 window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
@@ -982,6 +1046,9 @@ window.downloadReport=downloadReport;
 window.render=render;
 window.logout=logout;
 window.setDashFilter=setDashFilter;
+window.showUpdateDueModal=showUpdateDueModal;
+window.closeUpdateDueModal=closeUpdateDueModal;
+window.confirmUpdateDue=confirmUpdateDue;
 window.handleImport=handleImport;
 window.closeImportModal=closeImportModal;
 window.confirmImport=confirmImport;
