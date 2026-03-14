@@ -147,7 +147,38 @@ color:white;
 padding:15px;
 border-radius:8px;
 text-align:center;
+cursor:pointer;
+transition:all 0.2s;
+user-select:none;
 }
+
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 16px rgba(0,0,0,0.2);
+opacity:0.92;
+}
+
+.card.active-filter{
+outline:3px solid white;
+transform:translateY(-2px);
+box-shadow:0 6px 16px rgba(0,0,0,0.25);
+}
+
+.card#students{ background:#2d89ef; }
+.card#collected{ background:#2e7d32; }
+.card#pending{ background:#e65100; }
+.card#overdue{ background:#c62828; }
+
+.filter-label{
+text-align:center;
+font-size:12px;
+color:#888;
+margin-bottom:8px;
+font-style:italic;
+display:none;
+}
+
+.filter-label.visible{ display:block; }
 
 table{
 width:100%;
@@ -365,11 +396,12 @@ background:#e65100 !important;
 </div>
 
 <div class="dashboard">
-<div class="card" id="students">Students: 0</div>
-<div class="card" id="collected">Collected: ₹0</div>
-<div class="card" id="pending">Pending: ₹0</div>
-<div class="card" id="overdue">Overdue: 0</div>
+<div class="card" id="students" onclick="setDashFilter('all')" title="Show all students">Students: 0</div>
+<div class="card" id="collected" onclick="setDashFilter('paid')" title="Show paid students">Collected: ₹0</div>
+<div class="card" id="pending" onclick="setDashFilter('pending')" title="Show pending students">Pending: ₹0</div>
+<div class="card" id="overdue" onclick="setDashFilter('overdue')" title="Show overdue students">Overdue: 0</div>
 </div>
+<div class="filter-label" id="filterLabel"></div>
 
 <button id="reminderButton" class="reminder-btn" onclick="sendReminders()">
 📩 Send Fine Notice to All Overdue Students
@@ -664,10 +696,26 @@ let pending=0;
 // Get search query
 let query=document.getElementById("searchInput").value.trim().toLowerCase();
 
-// Filter students by name
-let filtered=query
-? students.filter(s=>s.name.toLowerCase().includes(query))
-: students;
+// Filter students by name + dashboard filter
+let filtered=students;
+
+if(query){
+  filtered=filtered.filter(s=>s.name.toLowerCase().includes(query));
+}
+
+if(window.dashFilter && window.dashFilter !== 'all'){
+  if(window.dashFilter === 'paid'){
+    filtered=filtered.filter(s=>s.paid);
+  } else if(window.dashFilter === 'pending'){
+    filtered=filtered.filter(s=>!s.paid);
+  } else if(window.dashFilter === 'overdue'){
+    filtered=filtered.filter(s=>{
+      if(s.paid) return false;
+      let today=new Date(); let due=new Date(s.due);
+      return today>due;
+    });
+  }
+}
 
 if(filtered.length===0 && query){
 tbody.innerHTML=`<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
@@ -878,6 +926,33 @@ async function confirmImport(){
   loadStudents();
 }
 
+function setDashFilter(filter){
+  window.dashFilter = filter;
+
+  // Update active card style
+  ['students','collected','pending','overdue'].forEach(id=>{
+    document.getElementById(id).classList.remove('active-filter');
+  });
+
+  const label = document.getElementById('filterLabel');
+
+  if(filter === 'all'){
+    label.classList.remove('visible');
+  } else {
+    const map = {
+      'paid':'Showing: Paid students — click any card to change filter',
+      'pending':'Showing: Pending students — click any card to change filter',
+      'overdue':'Showing: Overdue students — click any card to change filter'
+    };
+    const cardMap = { 'paid':'collected', 'pending':'pending', 'overdue':'overdue' };
+    document.getElementById(cardMap[filter]).classList.add('active-filter');
+    label.textContent = map[filter];
+    label.classList.add('visible');
+  }
+
+  render();
+}
+
 window.addStudent=addStudent;
 window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
@@ -889,6 +964,7 @@ window.sendReceipt=sendReceipt;
 window.downloadReport=downloadReport;
 window.render=render;
 window.logout=logout;
+window.setDashFilter=setDashFilter;
 window.handleImport=handleImport;
 window.closeImportModal=closeImportModal;
 window.confirmImport=confirmImport;
