@@ -767,9 +767,17 @@ let receipt=s.paid
 ?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
 :"";
 
+// Format due date nicely
+let dueFormatted = s.due ? new Date(s.due).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+let paidFormatted = s.paidDate ? new Date(s.paidDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+
 tbody.innerHTML+=`
 <tr>
-<td>${s.name}</td>
+<td>
+  <strong>${s.name}</strong>
+  <div style="font-size:11px;color:#888;margin-top:2px;">Due: ${dueFormatted}</div>
+  ${s.paid && paidFormatted ? `<div style="font-size:11px;color:#2e7d32;margin-top:1px;">Paid: ${paidFormatted}</div>` : ''}
+</td>
 <td>${s.phone}</td>
 <td>${s.course}</td>
 <td>₹${s.fee}</td>
@@ -791,6 +799,7 @@ mobile.innerHTML+=`
 <div class="mobile-card">
 
 <h3>${s.name}</h3>
+<div style="font-size:12px;color:#888;margin-top:-6px;margin-bottom:6px;">Due: ${dueFormatted}${s.paid && paidFormatted ? ' · Paid: '+paidFormatted : ''}</div>
 
 Course: ${s.course}<br>
 Fee: ₹${total}<br>
