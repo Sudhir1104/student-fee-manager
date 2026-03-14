@@ -481,7 +481,7 @@ background:#4a0072 !important;
 <th>Status</th>
 <th>Actions</th>
 <th>Reminder</th>
-<th>QR</th>
+<th>Remark</th>
 <th>Receipt</th>
 </tr>
 </thead>
@@ -823,7 +823,18 @@ tbody.innerHTML+=`
 <button onclick="deleteStudent('${s.id}')">Delete</button>
 </td>
 <td>${reminder}</td>
-<td><button onclick="paymentQR('${s.name}',${total})">QR Pay</button></td>
+<td>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <input type="text"
+      id="remark_${s.id}"
+      value="${s.remark||''}"
+      placeholder="Add remark..."
+      style="padding:5px 8px;border:1px solid #ccc;border-radius:5px;font-size:12px;width:130px;"
+      onblur="saveRemark('${s.id}',this.value)"
+      onkeydown="if(event.key==='Enter')this.blur()"
+    >
+  </div>
+</td>
 <td>${receipt}</td>
 </tr>
 `;
@@ -851,7 +862,16 @@ Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
 
 ${reminder}
 
-<button onclick="paymentQR('${s.name}',${total})">QR Pay</button>
+<div style="margin-top:8px;">
+  <input type="text"
+    id="remark_mob_${s.id}"
+    value="${s.remark||''}"
+    placeholder="Add remark..."
+    style="padding:8px;border:1px solid #ccc;border-radius:6px;font-size:13px;width:100%;box-sizing:border-box;"
+    onblur="saveRemark('${s.id}',this.value)"
+    onkeydown="if(event.key==='Enter')this.blur()"
+  >
+</div>
 
 ${receipt}
 
@@ -1034,6 +1054,30 @@ async function confirmUpdateDue(){
   btn.textContent = '✅ Update All Students';
 }
 
+// ── Save remark to Firestore ──────────────────────────────────────────
+async function saveRemark(id, remark){
+  let s = students.find(x=>x.id===id);
+  if(!s) return;
+  if(s.remark === remark) return; // no change
+  s.remark = remark;
+  await updateDoc(doc(db,"students",id),{ remark: remark });
+  showToast('Remark saved ✓');
+}
+
+function showToast(msg){
+  let t = document.getElementById('toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#2d89ef;color:white;padding:10px 22px;border-radius:30px;font-size:13px;opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2000);
+}
+
 window.addStudent=addStudent;
 window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
@@ -1046,6 +1090,7 @@ window.downloadReport=downloadReport;
 window.render=render;
 window.logout=logout;
 window.setDashFilter=setDashFilter;
+window.saveRemark=saveRemark;
 window.showUpdateDueModal=showUpdateDueModal;
 window.closeUpdateDueModal=closeUpdateDueModal;
 window.confirmUpdateDue=confirmUpdateDue;
@@ -1061,8 +1106,20 @@ let students=[];
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("/sw.js")
-    .then(()=> console.log("SW registered"))
-    .catch(e=> console.log("SW error",e));
+    .then(reg => {
+      console.log("SW registered");
+      // Check for updates every 60 seconds
+      setInterval(() => reg.update(), 60000);
+    })
+    .catch(e => console.log("SW error", e));
+
+  // Listen for new version message from service worker
+  navigator.serviceWorker.addEventListener("message", event => {
+    if(event.data && event.data.type === "NEW_VERSION"){
+      console.log("New version detected — reloading...");
+      window.location.reload(true);
+    }
+  });
 }
 </script>
 
