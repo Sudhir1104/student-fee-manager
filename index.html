@@ -133,6 +133,39 @@ padding:6px 10px;
 border-radius:5px;
 }
 
+.void-btn{
+background:#7b1fa2;
+color:white;
+padding:6px 10px;
+border-radius:5px;
+border:none;
+cursor:pointer;
+font-size:12px;
+font-weight:bold;
+transition:background 0.2s;
+}
+
+.void-btn:hover{ background:#4a0072; }
+
+.undo-void-btn{
+background:#ff9800;
+color:white;
+padding:6px 10px;
+border-radius:5px;
+border:none;
+cursor:pointer;
+font-size:12px;
+font-weight:bold;
+transition:background 0.2s;
+}
+
+.undo-void-btn:hover{ background:#e65100; }
+
+.void-status{
+color:#7b1fa2;
+font-weight:bold;
+}
+
 .dashboard{
 display:flex;
 gap:10px;
@@ -679,7 +712,7 @@ students.forEach((s)=>{
 let today=new Date();
 let due=new Date(s.due);
 
-if(!s.paid && today>due){
+if(!s.voided && !s.paid && today>due){
 let total=parseInt(s.fee)+100;
 sendReminder(s.phone,s.name,total);
 count++;
@@ -760,15 +793,20 @@ let today=new Date();
 let due=new Date(s.due);
 let late=0;
 
-if(!s.paid && today>due){
-late=100;
-overdueCount++;
+if(s.voided){
+  // voided — excluded from all totals
+} else if(!s.paid && today>due){
+  late=100;
+  overdueCount++;
+  let total=safeFee(s.fee)+late;
+  pending+=total;
+} else if(s.paid){
+  let total=safeFee(s.fee)+late;
+  collected+=total;
+} else {
+  let total=safeFee(s.fee)+late;
+  pending+=total;
 }
-
-let total=safeFee(s.fee)+late;
-
-if(s.paid)collected+=total;
-else pending+=total;
 
 });
 
@@ -781,18 +819,23 @@ let due=new Date(s.due);
 let late=0;
 let status="Pending";
 
-if(!s.paid && today>due){
-late=100;
-status="Overdue";
+if(s.voided){
+  status="Void";
+  late=0;
+} else if(!s.paid && today>due){
+  late=100;
+  status="Overdue";
+} else if(s.paid){
+  status="Paid";
 }
 
-if(s.paid)status="Paid";
+let total = s.voided ? 0 : safeFee(s.fee)+late;
 
-let total=safeFee(s.fee)+late;
-
-let reminder=s.paid
-?'<span class="disabled-btn">Paid</span>'
-:`<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
+let reminder = s.voided
+  ? '<span class="disabled-btn">Voided</span>'
+  : s.paid
+    ? '<span class="disabled-btn">Paid</span>'
+    : `<button onclick="sendReminder('${s.phone}','${s.name}','${total}')">Reminder</button>`;
 
 let receipt=s.paid
 ?`<button onclick="sendReceipt('${s.phone}','${s.name}','${total}','${s.receiptNumber || "N/A"}','${s.paidDate || ""}')">Resend Receipt</button>`
@@ -810,16 +853,21 @@ tbody.innerHTML+=`
   ${s.paid && paidFormatted ? `<div style="font-size:11px;color:#2e7d32;margin-top:1px;">✅ Paid: ${paidFormatted}</div>` : ''}
   ${status=='Overdue' ? `<div style="font-size:11px;font-weight:bold;color:white;background:#c62828;padding:2px 7px;border-radius:4px;display:inline-block;margin-top:3px;letter-spacing:0.5px;">⚠ OVERDUE</div>` : ''}
   ${status=='Pending' ? `<div style="font-size:11px;color:#e65100;margin-top:2px;">⏳ Payment pending</div>` : ''}
+  ${status=='Void' ? `<div style="font-size:11px;font-weight:bold;color:white;background:#7b1fa2;padding:2px 7px;border-radius:4px;display:inline-block;margin-top:3px;letter-spacing:0.5px;">✕ VOID</div>` : ''}
 </td>
 <td>${s.phone}</td>
 <td>${s.course}</td>
 <td>₹${s.fee}</td>
 <td>₹${late}</td>
 <td>₹${total}</td>
-<td class="${status=='Overdue'?'overdue':''}">${status}</td>
+<td class="${status=='Overdue'?'overdue':status=='Void'?'void-status':''}">${status}</td>
 <td>
 <button onclick="editStudent('${s.id}')">Edit</button>
-<button onclick="markPaid('${s.id}')">Paid</button>
+${s.voided
+  ? `<button class="undo-void-btn" onclick="undoVoid('${s.id}')">↺ Undo Void</button>`
+  : `<button onclick="markPaid('${s.id}')">Paid</button>
+     <button class="void-btn" onclick="voidFee('${s.id}')">VOID</button>`
+}
 <button onclick="deleteStudent('${s.id}')">Delete</button>
 </td>
 <td>${reminder}</td>
@@ -855,7 +903,11 @@ Status: <span class="${status=='Overdue'?'overdue':''}">${status}</span>
 <br><br>
 
 <button onclick="editStudent('${s.id}')">Edit</button>
-<button onclick="markPaid('${s.id}')">Paid</button>
+${s.voided
+  ? `<button class="undo-void-btn" onclick="undoVoid('${s.id}')">↺ Undo Void</button>`
+  : `<button onclick="markPaid('${s.id}')">Paid</button>
+     <button class="void-btn" onclick="voidFee('${s.id}')">VOID</button>`
+}
 <button onclick="deleteStudent('${s.id}')">Delete</button>
 
 <br><br>
@@ -1054,6 +1106,32 @@ async function confirmUpdateDue(){
   btn.textContent = '✅ Update All Students';
 }
 
+// ── Void fee ──────────────────────────────────────────────────────────
+async function voidFee(id){
+  let s = students.find(x=>x.id===id);
+  if(!s) return;
+  if(!confirm(`Void fee for ${s.name} this month? This can be undone.`)) return;
+  await updateDoc(doc(db,"students",id),{
+    voided: true,
+    voidedDate: new Date().toISOString().slice(0,10),
+    paid: false
+  });
+  showToast(`✕ Fee voided for ${s.name}`);
+  loadStudents();
+}
+
+async function undoVoid(id){
+  let s = students.find(x=>x.id===id);
+  if(!s) return;
+  if(!confirm(`Undo void for ${s.name}?`)) return;
+  await updateDoc(doc(db,"students",id),{
+    voided: false,
+    voidedDate: null
+  });
+  showToast(`↺ Void removed for ${s.name}`);
+  loadStudents();
+}
+
 // ── Save remark to Firestore ──────────────────────────────────────────
 async function saveRemark(id, remark){
   let s = students.find(x=>x.id===id);
@@ -1091,6 +1169,8 @@ window.render=render;
 window.logout=logout;
 window.setDashFilter=setDashFilter;
 window.saveRemark=saveRemark;
+window.voidFee=voidFee;
+window.undoVoid=undoVoid;
 window.showUpdateDueModal=showUpdateDueModal;
 window.closeUpdateDueModal=closeUpdateDueModal;
 window.confirmUpdateDue=confirmUpdateDue;
