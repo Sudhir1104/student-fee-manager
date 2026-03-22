@@ -613,6 +613,8 @@ color:#1b5fbf;
 </div>
 </div>
 
+<table>
+
 <thead>
 <tr>
 <th>Name</th>
@@ -1456,8 +1458,8 @@ async function loadMonthlyRecords(){
   snap.forEach(d=>records.push(d.data()));
   records.sort((a,b)=>{ 
     let da=new Date(a.archivedOn||'2000-01-01');
-    let db2=new Date(b.archivedOn||'2000-01-01');
-    return db2-da;
+    let db_=new Date(b.archivedOn||'2000-01-01');
+    return db_-da;
   });
 
   let html = '';
@@ -1514,11 +1516,12 @@ async function loadMonthlyRecords(){
 }
 
 async function downloadMonthRecord(monthKey){
-  let r = (window._monthlyRecordsCache||[]).find(x=>x.monthKey===monthKey);
+  let records = window._monthlyRecordsCache || [];
+  let r = records.find(x=>x.monthKey===monthKey);
   if(!r){
-    // Fetch from Firestore
-    const snap2 = await getDocs(collection(db,"monthlyRecords"));
-    snap2.forEach(d=>{ if(d.id===monthKey) r=d.data(); });
+    // Fallback: fetch just this document from Firestore
+    const allSnap = await getDocs(collection(db,"monthlyRecords"));
+    allSnap.forEach(d=>{ if(d.id===monthKey) r=d.data(); });
   }
   if(!r){ alert('Record not found.'); return; }
   exportMonthlyExcel(r.students||[], r.month);
