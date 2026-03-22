@@ -269,12 +269,53 @@ font-size:16px;
 pointer-events:none;
 }
 
-.no-results{
-text-align:center;
-color:#999;
-padding:20px;
-font-style:italic;
+.alpha-bar{
+display:flex;
+flex-wrap:wrap;
+gap:4px;
+margin-bottom:12px;
 }
+
+.alpha-btn{
+min-width:30px;
+padding:5px 6px;
+font-size:13px;
+font-weight:bold;
+border:1.5px solid #c8d8f0;
+border-radius:6px;
+background:#f0f4ff;
+color:#2d89ef;
+cursor:pointer;
+text-align:center;
+transition:all 0.15s;
+line-height:1;
+width:auto;
+margin:0;
+}
+
+.alpha-btn:hover{
+background:#d0e4ff;
+border-color:#2d89ef;
+}
+
+.alpha-btn.active-alpha{
+background:#2d89ef;
+color:white;
+border-color:#1b5fbf;
+}
+
+.alpha-btn.has-students{
+border-color:#2d89ef;
+}
+
+.alpha-btn:disabled,
+.alpha-btn.no-students{
+opacity:0.3;
+cursor:default;
+pointer-events:none;
+}
+
+
 
 @media(max-width:700px){
 
@@ -585,7 +626,12 @@ color:#1b5fbf;
 <!-- Search Bar -->
 <div class="search-wrapper">
 <span class="search-icon">🔍</span>
-<input id="searchInput" placeholder="Search student by name..." oninput="render()">
+<input id="searchInput" placeholder="Search student by name..." oninput="onSearchInput()">
+</div>
+
+<!-- Alphabet filter bar -->
+<div class="alpha-bar" id="alphaBar">
+  <button class="alpha-btn active-alpha" onclick="setAlphaFilter('ALL')">All</button>
 </div>
 
 <input id="name" placeholder="Student Name">
@@ -1048,11 +1094,17 @@ let pending=0;
 // Get search query
 let query=document.getElementById("searchInput").value.trim().toLowerCase();
 
-// Filter students by name + dashboard filter
+// Filter students by name + dashboard filter + alpha filter
 let filtered=students;
 
 if(query){
   filtered=filtered.filter(s=>s.name.toLowerCase().includes(query));
+}
+
+// Alpha filter (set by setAlphaFilter)
+let alphaFilter = window.alphaFilter || 'ALL';
+if(alphaFilter !== 'ALL'){
+  filtered=filtered.filter(s=>s.name && s.name.toUpperCase().startsWith(alphaFilter));
 }
 
 if(window.dashFilter && window.dashFilter !== 'all'){
@@ -1069,9 +1121,12 @@ if(window.dashFilter && window.dashFilter !== 'all'){
   }
 }
 
-if(filtered.length===0 && query){
-tbody.innerHTML=`<tr><td colspan="11" class="no-results">No student found matching "${query}"</td></tr>`;
-mobile.innerHTML=`<div class="no-results">No student found matching "${query}"</div>`;
+if(filtered.length===0){
+  let msg = query ? `No student found matching "${query}"` :
+            alphaFilter !== 'ALL' ? `No students with names starting with "${alphaFilter}"` :
+            'No students found.';
+  tbody.innerHTML=`<tr><td colspan="11" class="no-results">${msg}</td></tr>`;
+  mobile.innerHTML=`<div class="no-results">${msg}</div>`;
 }
 
 // Safe number parser
@@ -1227,6 +1282,9 @@ document.getElementById("students").innerText="Students: "+students.length;
 document.getElementById("collected").innerText="Collected: ₹"+collected;
 document.getElementById("pending").innerText="Pending: ₹"+pending;
 document.getElementById("overdue").innerText="Overdue: "+overdueCount;
+
+// Rebuild alpha bar to reflect current student list
+buildAlphaBar();
 
 }
 
@@ -1995,7 +2053,65 @@ function sendMonthlyReminders(){
   });
 }
 
-window.showMonthlyReminderModal  = showMonthlyReminderModal;
+// ── Alphabet filter bar ───────────────────────────────────────────────────
+window.alphaFilter = 'ALL';
+
+function buildAlphaBar(){
+  // Find which letters actually have students
+  let letters = new Set(
+    students
+      .map(s => s.name && s.name.trim() ? s.name.trim()[0].toUpperCase() : null)
+      .filter(Boolean)
+  );
+
+  let bar = document.getElementById('alphaBar');
+  let current = window.alphaFilter || 'ALL';
+  bar.innerHTML = '';
+
+  // "All" button
+  let allBtn = document.createElement('button');
+  allBtn.className = 'alpha-btn' + (current==='ALL' ? ' active-alpha' : '');
+  allBtn.textContent = 'All';
+  allBtn.onclick = () => setAlphaFilter('ALL');
+  bar.appendChild(allBtn);
+
+  // A–Z buttons
+  for(let i=65; i<=90; i++){
+    let ch = String.fromCharCode(i);
+    let btn = document.createElement('button');
+    btn.textContent = ch;
+    let hasStudents = letters.has(ch);
+    btn.className = 'alpha-btn' +
+      (hasStudents ? ' has-students' : ' no-students') +
+      (current===ch ? ' active-alpha' : '');
+    if(hasStudents){
+      btn.onclick = () => setAlphaFilter(ch);
+    }
+    bar.appendChild(btn);
+  }
+}
+
+function setAlphaFilter(letter){
+  window.alphaFilter = letter;
+  // Clear text search when switching alpha
+  document.getElementById('searchInput').value = '';
+  buildAlphaBar();
+  render();
+}
+
+function onSearchInput(){
+  // When user types in search box, reset alpha filter to ALL
+  if(window.alphaFilter !== 'ALL'){
+    window.alphaFilter = 'ALL';
+    buildAlphaBar();
+  }
+  render();
+}
+
+window.setAlphaFilter = setAlphaFilter;
+window.onSearchInput  = onSearchInput;
+
+
 window.closeMonthlyReminderModal = closeMonthlyReminderModal;
 window.switchReminderTab         = switchReminderTab;
 window.saveReminderTemplate      = saveReminderTemplate;
