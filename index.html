@@ -408,6 +408,89 @@ background:#7b1fa2;
 background:#4a0072 !important;
 }
 
+.records-btn{
+background:#00796b;
+}
+
+.records-btn:hover{
+background:#004d40 !important;
+}
+
+.rollover-warning{
+background:#fff3e0;
+border:2px solid #ff9800;
+border-radius:8px;
+padding:12px 16px;
+margin-bottom:14px;
+font-size:13px;
+color:#e65100;
+display:none;
+}
+
+.rollover-warning strong{
+display:block;
+font-size:15px;
+margin-bottom:4px;
+color:#bf360c;
+}
+
+.month-badge{
+display:inline-block;
+background:#2d89ef;
+color:white;
+border-radius:20px;
+padding:4px 14px;
+font-size:13px;
+font-weight:bold;
+margin:3px 4px;
+cursor:pointer;
+transition:background 0.2s;
+}
+
+.month-badge:hover{
+background:#1b5fbf;
+}
+
+.month-table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+margin-top:10px;
+}
+
+.month-table th{
+background:#2d89ef;
+color:white;
+padding:8px;
+text-align:left;
+}
+
+.month-table td{
+padding:7px 8px;
+border-bottom:1px solid #eee;
+}
+
+.month-table tr:nth-child(even){
+background:#f5f5f5;
+}
+
+.summary-box{
+background:#f0f7ff;
+border:1px solid #c5e0fb;
+border-radius:8px;
+padding:12px 16px;
+font-size:13px;
+margin-bottom:12px;
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.summary-box span{
+font-weight:bold;
+color:#1b5fbf;
+}
+
 </style>
 </head>
 
@@ -465,6 +548,7 @@ background:#4a0072 !important;
 <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)">
 <button class="import-file-btn" onclick="document.getElementById('importFile').click()">📂 Import from Excel</button>
 <button class="update-due-btn" onclick="showUpdateDueModal()">📅 Update All Due Dates</button>
+<button class="records-btn" onclick="showMonthlyRecordsModal()">📊 Monthly Records</button>
 
 <!-- Update Due Date Modal -->
 <div class="modal-overlay" id="updateDueModal">
@@ -474,9 +558,21 @@ background:#4a0072 !important;
   This will update the due date for <strong>all students</strong> at once.<br>
   Useful for setting the monthly payment deadline.
 </div>
+
+<!-- Month-rollover warning — shown dynamically -->
+<div class="rollover-warning" id="rolloverWarning">
+  <strong>⚠ New Month Detected — Monthly Rollover</strong>
+  Changing to a new month will:
+  <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.8;">
+    <li>💾 Save <strong id="rolloverMonthName">this month</strong>'s data to the database</li>
+    <li>📥 Auto-download the month's Excel report</li>
+    <li>🔄 Reset all students to <strong>Unpaid</strong> for the new month</li>
+  </ul>
+</div>
+
 <div class="admin-field" style="margin-bottom:15px;">
   <label style="font-size:13px;font-weight:bold;color:#555;display:block;margin-bottom:6px;">Select New Due Date</label>
-  <input type="date" id="bulkDueDate" style="padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:15px;width:100%;">
+  <input type="date" id="bulkDueDate" style="padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:15px;width:100%;" oninput="checkRollover(this.value)">
 </div>
 <div class="modal-actions">
   <button class="cancel-btn" onclick="closeUpdateDueModal()">✕ Cancel</button>
@@ -501,7 +597,21 @@ background:#4a0072 !important;
 </div>
 </div>
 
-<table>
+<!-- Monthly Records Modal -->
+<div class="modal-overlay" id="monthlyRecordsModal">
+<div class="modal">
+<h3>📊 Monthly Records</h3>
+<div class="modal-hint">
+  Fee records saved at end of each month. Click a month to view details and download the Excel report.
+</div>
+<div id="monthlyRecordsList" style="max-height:60vh;overflow-y:auto;">
+  <p style="color:#999;text-align:center;">Loading…</p>
+</div>
+<div class="modal-actions" style="margin-top:14px;">
+  <button class="cancel-btn" onclick="closeMonthlyRecordsModal()">✕ Close</button>
+</div>
+</div>
+</div>
 
 <thead>
 <tr>
@@ -535,7 +645,7 @@ background:#4a0072 !important;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc }
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, setDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -1070,13 +1180,27 @@ function setDashFilter(filter){
   render();
 }
 
+// ── Helper: get month name from date string ────────────────────────────
+function getMonthKey(dateStr){
+  // Returns e.g. "March_2025"
+  let d = new Date(dateStr);
+  return d.toLocaleString('en-IN',{month:'long'})+'_'+d.getFullYear();
+}
+
+function getMonthLabel(dateStr){
+  // Returns e.g. "March 2025"
+  let d = new Date(dateStr);
+  return d.toLocaleString('en-IN',{month:'long',year:'numeric'});
+}
+
 // ── Update all due dates ──────────────────────────────────────────────
 function showUpdateDueModal(){
-  // Default to 10th of current month
+  // Default to 10th of next month if students already have a due date, else current month
   let today = new Date();
   let y = today.getFullYear();
   let m = String(today.getMonth()+1).padStart(2,'0');
   document.getElementById('bulkDueDate').value = `${y}-${m}-10`;
+  document.getElementById('rolloverWarning').style.display = 'none';
   document.getElementById('updateDueModal').classList.add('active');
 }
 
@@ -1084,26 +1208,320 @@ function closeUpdateDueModal(){
   document.getElementById('updateDueModal').classList.remove('active');
 }
 
+// Called whenever the date picker changes — show/hide rollover warning
+function checkRollover(newDue){
+  if(!newDue || students.length === 0){ 
+    document.getElementById('rolloverWarning').style.display='none'; 
+    return; 
+  }
+  // Get current month from the first student that has a due date
+  let currentDue = students.find(s=>s.due)?.due;
+  if(!currentDue){ 
+    document.getElementById('rolloverWarning').style.display='none'; 
+    return; 
+  }
+  let oldDate = new Date(currentDue);
+  let newDate = new Date(newDue);
+  let isNewMonth = (newDate.getFullYear() !== oldDate.getFullYear()) ||
+                   (newDate.getMonth()    !== oldDate.getMonth());
+  if(isNewMonth){
+    // Show which month will be archived
+    let archiveName = getMonthLabel(currentDue);
+    document.getElementById('rolloverMonthName').textContent = archiveName;
+    document.getElementById('rolloverWarning').style.display = 'block';
+  } else {
+    document.getElementById('rolloverWarning').style.display = 'none';
+  }
+}
+
 async function confirmUpdateDue(){
   let newDue = document.getElementById('bulkDueDate').value;
   if(!newDue){ alert('Please select a date'); return; }
 
+  // Determine if this is a month rollover
+  let currentDue = students.find(s=>s.due)?.due;
+  let isRollover = false;
+  let archiveMonthKey = null;
+  let archiveMonthLabel = null;
+
+  if(currentDue){
+    let oldDate = new Date(currentDue);
+    let newDate = new Date(newDue);
+    isRollover = (newDate.getFullYear() !== oldDate.getFullYear()) ||
+                 (newDate.getMonth()    !== oldDate.getMonth());
+    if(isRollover){
+      archiveMonthKey   = getMonthKey(currentDue);    // e.g. "March_2025"
+      archiveMonthLabel = getMonthLabel(currentDue);  // e.g. "March 2025"
+    }
+  }
+
+  // Extra confirmation for rollover
+  if(isRollover){
+    let ok = confirm(
+      `🗓 Month Rollover Detected!\n\n`+
+      `This will:\n`+
+      `1. Save "${archiveMonthLabel}" records to the database\n`+
+      `2. Download "${archiveMonthLabel}" Excel report\n`+
+      `3. Reset ALL students to Unpaid for the new month\n\n`+
+      `Proceed?`
+    );
+    if(!ok) return;
+  }
+
   let btn = document.querySelector('#updateDueModal .import-btn-green');
   btn.disabled = true;
-  btn.textContent = 'Updating…';
+  btn.textContent = isRollover ? 'Archiving month…' : 'Updating…';
 
+  // ── Step 1: Archive current month to Firestore ──────────────────────
+  if(isRollover){
+    await archiveCurrentMonth(archiveMonthKey, archiveMonthLabel);
+    // ── Step 2: Auto-export Excel for the archived month ───────────────
+    exportMonthlyExcel(students, archiveMonthLabel);
+    btn.textContent = 'Resetting students…';
+  }
+
+  // ── Step 3: Update due dates (+ reset payment status if rollover) ────
   let count = 0;
   for(let s of students){
-    await updateDoc(doc(db,"students",s.id),{ due: newDue });
+    let update = { due: newDue };
+    if(isRollover){
+      // Reset payment status for new month
+      update.paid        = false;
+      update.paidDate    = null;
+      update.receiptNumber = null;
+      update.voided      = false;
+      update.voidedDate  = null;
+      update.remark      = '';
+    }
+    await updateDoc(doc(db,"students",s.id), update);
     count++;
   }
 
   closeUpdateDueModal();
-  alert(`✅ Due date updated to ${new Date(newDue).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} for ${count} students!`);
-  loadStudents();
 
+  let newDateFormatted = new Date(newDue).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  if(isRollover){
+    showToast(`✅ Month rolled over! ${archiveMonthLabel} archived & dashboard reset.`);
+    alert(
+      `✅ Month Rollover Complete!\n\n`+
+      `📦 "${archiveMonthLabel}" data saved to database\n`+
+      `📥 Excel report downloaded\n`+
+      `🔄 All ${count} students reset to Unpaid\n`+
+      `📅 New due date: ${newDateFormatted}`
+    );
+  } else {
+    alert(`✅ Due date updated to ${newDateFormatted} for ${count} students!`);
+  }
+
+  loadStudents();
   btn.disabled = false;
   btn.textContent = '✅ Update All Students';
+}
+
+// ── Archive current month to Firestore ─────────────────────────────────
+async function archiveCurrentMonth(monthKey, monthLabel){
+  // Build snapshot of all student records for this month
+  let today = new Date().toISOString().slice(0,10);
+  let collected = 0;
+  let pending   = 0;
+  let overdueCount = 0;
+
+  let studentRecords = students.map(s=>{
+    let fee = parseInt(s.fee)||0;
+    let late = (!s.voided && !s.paid && s.due && new Date()>new Date(s.due)) ? 100 : 0;
+    let total = s.voided ? 0 : fee+late;
+    let status = s.voided ? 'Void' : s.paid ? 'Paid' :
+                 (s.due && new Date()>new Date(s.due)) ? 'Overdue' : 'Pending';
+
+    if(!s.voided){
+      if(s.paid)        collected += total;
+      else if(late>0)  { overdueCount++; pending += total; }
+      else              pending += total;
+    }
+
+    return {
+      name:          s.name   || '',
+      phone:         s.phone  || '',
+      course:        s.course || '',
+      fee:           s.fee    || '0',
+      lateFine:      late,
+      total:         total,
+      status:        status,
+      paid:          s.paid   || false,
+      paidDate:      s.paidDate    || null,
+      receiptNumber: s.receiptNumber || null,
+      voided:        s.voided || false,
+      remark:        s.remark || '',
+      due:           s.due    || ''
+    };
+  });
+
+  // Save to Firestore under collection "monthlyRecords" / docId = monthKey
+  await setDoc(doc(db, "monthlyRecords", monthKey), {
+    month:          monthLabel,
+    monthKey:       monthKey,
+    archivedOn:     today,
+    totalStudents:  students.length,
+    totalCollected: collected,
+    totalPending:   pending,
+    overdueCount:   overdueCount,
+    students:       studentRecords
+  });
+}
+
+// ── Export monthly data as Excel ────────────────────────────────────────
+function exportMonthlyExcel(studentList, label){
+  // Build rows
+  let rows = studentList.map(s=>{
+    let fee  = parseInt(s.fee)||0;
+    let late = (!s.voided && !s.paid && s.due && new Date()>new Date(s.due)) ? 100 : 0;
+    let total = s.voided ? 0 : fee+late;
+    let status = s.voided ? 'Void' : s.paid ? 'Paid' :
+                 (s.due && new Date()>new Date(s.due)) ? 'Overdue' : 'Pending';
+    return {
+      'Name':           s.name,
+      'Phone':          s.phone,
+      'Course':         s.course,
+      'Fee (₹)':        fee,
+      'Late Fine (₹)':  late,
+      'Total (₹)':      total,
+      'Status':         status,
+      'Due Date':       s.due || '',
+      'Paid Date':      s.paidDate || '',
+      'Receipt No':     s.receiptNumber || '',
+      'Voided':         s.voided ? 'Yes' : 'No',
+      'Remark':         s.remark || ''
+    };
+  });
+
+  // Add summary rows at the bottom
+  rows.push({});
+  let collected = 0; let pending = 0; let overdueC = 0;
+  studentList.forEach(s=>{
+    let fee=parseInt(s.fee)||0;
+    let late=(!s.voided&&!s.paid&&s.due&&new Date()>new Date(s.due))?100:0;
+    let total=s.voided?0:fee+late;
+    if(!s.voided){ if(s.paid) collected+=total; else{ if(late>0) overdueC++; pending+=total; } }
+  });
+  rows.push({'Name':'SUMMARY','Phone':'','Course':'','Fee (₹)':'','Late Fine (₹)':'',
+    'Total (₹)':'','Status':'','Due Date':'','Paid Date':'','Receipt No':'','Voided':'','Remark':''});
+  rows.push({'Name':'Total Students',   'Phone':studentList.length});
+  rows.push({'Name':'Total Collected',  'Phone':'₹'+collected});
+  rows.push({'Name':'Total Pending',    'Phone':'₹'+pending});
+  rows.push({'Name':'Overdue Count',    'Phone':overdueC});
+
+  let ws = XLSX.utils.json_to_sheet(rows);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, label.replace('/','_'));
+
+  // Style header row
+  let range = XLSX.utils.decode_range(ws['!ref']);
+  for(let C = range.s.c; C <= range.e.c; ++C){
+    let addr = XLSX.utils.encode_cell({r:0, c:C});
+    if(ws[addr]) ws[addr].s = { font:{bold:true}, fill:{fgColor:{rgb:"2d89ef"}} };
+  }
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:22},{wch:14},{wch:18},{wch:10},{wch:12},{wch:10},
+    {wch:10},{wch:12},{wch:12},{wch:16},{wch:8},{wch:20}
+  ];
+
+  let fileName = `Srishti_Fees_${label.replace(' ','_')}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+}
+
+// ── Monthly Records Modal ────────────────────────────────────────────────
+async function showMonthlyRecordsModal(){
+  document.getElementById('monthlyRecordsModal').classList.add('active');
+  document.getElementById('monthlyRecordsList').innerHTML='<p style="color:#999;text-align:center;">Loading…</p>';
+  await loadMonthlyRecords();
+}
+
+function closeMonthlyRecordsModal(){
+  document.getElementById('monthlyRecordsModal').classList.remove('active');
+}
+
+async function loadMonthlyRecords(){
+  const snap = await getDocs(collection(db,"monthlyRecords"));
+  if(snap.empty){
+    document.getElementById('monthlyRecordsList').innerHTML=
+      '<p style="color:#999;text-align:center;padding:20px;">No monthly records saved yet.</p>';
+    return;
+  }
+
+  // Sort months reverse-chronologically
+  let records = [];
+  snap.forEach(d=>records.push(d.data()));
+  records.sort((a,b)=>{ 
+    let da=new Date(a.archivedOn||'2000-01-01');
+    let db2=new Date(b.archivedOn||'2000-01-01');
+    return db2-da;
+  });
+
+  let html = '';
+  records.forEach(r=>{
+    html += `
+    <div style="border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div>
+          <strong style="font-size:16px;color:#2d89ef;">📅 ${r.month}</strong>
+          <div style="font-size:12px;color:#888;margin-top:2px;">Archived: ${r.archivedOn||'—'}</div>
+        </div>
+        <button onclick="downloadMonthRecord('${r.monthKey}')" 
+          style="background:#2e7d32;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;width:auto;">
+          📥 Download Excel
+        </button>
+      </div>
+      <div class="summary-box" style="margin-top:10px;">
+        <div>Students: <span>${r.totalStudents||0}</span></div>
+        <div>Collected: <span>₹${r.totalCollected||0}</span></div>
+        <div>Pending: <span>₹${r.totalPending||0}</span></div>
+        <div>Overdue: <span>${r.overdueCount||0}</span></div>
+      </div>
+      <details style="margin-top:6px;">
+        <summary style="cursor:pointer;font-size:13px;color:#2d89ef;font-weight:bold;">
+          View Student Details (${(r.students||[]).length} records)
+        </summary>
+        <div style="overflow-x:auto;margin-top:8px;">
+        <table class="month-table">
+          <thead><tr>
+            <th>Name</th><th>Course</th><th>Fee</th><th>Late</th><th>Total</th><th>Status</th><th>Paid Date</th><th>Remark</th>
+          </tr></thead>
+          <tbody>
+            ${(r.students||[]).map(s=>`
+              <tr>
+                <td>${s.name}</td>
+                <td>${s.course||'—'}</td>
+                <td>₹${s.fee}</td>
+                <td>${s.lateFine?'₹'+s.lateFine:'—'}</td>
+                <td>₹${s.total}</td>
+                <td style="color:${s.status==='Paid'?'#2e7d32':s.status==='Overdue'?'#c62828':s.status==='Void'?'#7b1fa2':'#e65100'};font-weight:bold;">${s.status}</td>
+                <td>${s.paidDate||'—'}</td>
+                <td>${s.remark||'—'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        </div>
+      </details>
+    </div>`;
+  });
+
+  document.getElementById('monthlyRecordsList').innerHTML = html;
+  // Store records in memory for download
+  window._monthlyRecordsCache = records;
+}
+
+async function downloadMonthRecord(monthKey){
+  let r = (window._monthlyRecordsCache||[]).find(x=>x.monthKey===monthKey);
+  if(!r){
+    // Fetch from Firestore
+    const snap2 = await getDocs(collection(db,"monthlyRecords"));
+    snap2.forEach(d=>{ if(d.id===monthKey) r=d.data(); });
+  }
+  if(!r){ alert('Record not found.'); return; }
+  exportMonthlyExcel(r.students||[], r.month);
 }
 
 // ── Void fee ──────────────────────────────────────────────────────────
@@ -1174,9 +1592,13 @@ window.undoVoid=undoVoid;
 window.showUpdateDueModal=showUpdateDueModal;
 window.closeUpdateDueModal=closeUpdateDueModal;
 window.confirmUpdateDue=confirmUpdateDue;
+window.checkRollover=checkRollover;
 window.handleImport=handleImport;
 window.closeImportModal=closeImportModal;
 window.confirmImport=confirmImport;
+window.showMonthlyRecordsModal=showMonthlyRecordsModal;
+window.closeMonthlyRecordsModal=closeMonthlyRecordsModal;
+window.downloadMonthRecord=downloadMonthRecord;
 
 let students=[];
 
