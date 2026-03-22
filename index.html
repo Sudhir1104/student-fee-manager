@@ -605,48 +605,95 @@ color:#1b5fbf;
 <!-- Monthly Fee Reminder Modal -->
 <div class="modal-overlay" id="monthlyReminderModal">
 <div class="modal">
-<h3>📲 Send Monthly Fee Reminder</h3>
-<div class="modal-hint">
-  Write your message below. Use the tags to insert student details automatically.<br>
-  A separate WhatsApp message will open for each student.
+<h3>📲 Monthly Fee Reminder</h3>
+
+<!-- Tab switcher -->
+<div style="display:flex;gap:0;margin-bottom:16px;border:1.5px solid #2d89ef;border-radius:8px;overflow:hidden;">
+  <button id="tabEdit"
+    onclick="switchReminderTab('edit')"
+    style="flex:1;border:none;padding:10px;font-size:13px;font-weight:bold;cursor:pointer;background:#2d89ef;color:white;border-radius:0;">
+    ✏️ Edit Template
+  </button>
+  <button id="tabSend"
+    onclick="switchReminderTab('send')"
+    style="flex:1;border:none;padding:10px;font-size:13px;font-weight:bold;cursor:pointer;background:#f0f4ff;color:#2d89ef;border-radius:0;">
+    📲 Send
+  </button>
 </div>
 
-<!-- Tag chips -->
-<div style="margin-bottom:10px;">
-  <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:5px;">Click a tag to insert at cursor:</div>
-  <span class="tag-chip" onclick="insertTag('{name}')">👤 {name}</span>
-  <span class="tag-chip" onclick="insertTag('{fee}')">💰 {fee}</span>
-  <span class="tag-chip" onclick="insertTag('{due_date}')">📅 {due_date}</span>
-  <span class="tag-chip" onclick="insertTag('{course}')">📚 {course}</span>
-  <span class="tag-chip" onclick="insertTag('{month}')">🗓 {month}</span>
-</div>
-
-<!-- Editable message -->
-<div style="margin-bottom:12px;">
-  <label style="font-size:13px;font-weight:bold;color:#555;display:block;margin-bottom:6px;">Message Template</label>
-  <textarea id="reminderMsgTemplate" rows="9"
-    style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:14px;line-height:1.6;resize:vertical;font-family:Arial,sans-serif;"
-    oninput="updateReminderPreview()"></textarea>
-</div>
-
-<!-- Live preview -->
-<div style="margin-bottom:14px;">
-  <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:6px;">
-    👁 Preview <span style="font-weight:normal;color:#888;">(shown for first student)</span>
+<!-- ── EDIT TAB ── -->
+<div id="reminderEditPanel">
+  <div class="modal-hint" style="margin-bottom:10px;">
+    Write your message below, then click <strong>Save Template</strong>. Come back to the Send tab when you're ready.
   </div>
-  <div class="preview-bubble" id="reminderPreview">—</div>
+
+  <!-- Tag chips -->
+  <div style="margin-bottom:10px;">
+    <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:5px;">Click a tag to insert at cursor:</div>
+    <span class="tag-chip" onclick="insertTag('{name}')">👤 {name}</span>
+    <span class="tag-chip" onclick="insertTag('{fee}')">💰 {fee}</span>
+    <span class="tag-chip" onclick="insertTag('{due_date}')">📅 {due_date}</span>
+    <span class="tag-chip" onclick="insertTag('{course}')">📚 {course}</span>
+    <span class="tag-chip" onclick="insertTag('{month}')">🗓 {month}</span>
+  </div>
+
+  <!-- Textarea -->
+  <textarea id="reminderMsgTemplate" rows="10"
+    style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:14px;line-height:1.6;resize:vertical;font-family:Arial,sans-serif;margin-bottom:10px;"
+    oninput="updateReminderPreview(); markUnsaved()"></textarea>
+
+  <!-- Saved status -->
+  <div id="templateSaveStatus" style="font-size:12px;color:#888;margin-bottom:10px;min-height:18px;"></div>
+
+  <!-- Live preview -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:6px;">
+      👁 Preview <span style="font-weight:normal;color:#888;">(shown for first student)</span>
+    </div>
+    <div class="preview-bubble" id="reminderPreview">—</div>
+  </div>
+
+  <div class="modal-actions">
+    <button class="cancel-btn" onclick="closeMonthlyReminderModal()">✕ Close</button>
+    <button style="background:#e65100;" onclick="resetToDefaultTemplate()">↺ Reset Default</button>
+    <button class="import-btn-green" id="saveTemplateBtn" onclick="saveReminderTemplate()">💾 Save Template</button>
+  </div>
 </div>
 
-<!-- Student count info -->
-<div id="reminderStudentInfo" style="font-size:13px;color:#555;margin-bottom:10px;"></div>
+<!-- ── SEND TAB ── -->
+<div id="reminderSendPanel" style="display:none;">
+  <!-- Template preview (read-only) -->
+  <div style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-size:13px;font-weight:bold;color:#555;">Saved Template Preview</div>
+      <span id="templateSavedBadge"
+        style="font-size:11px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:20px;padding:3px 10px;"></span>
+    </div>
+    <div class="preview-bubble" id="reminderSendPreview">—</div>
+    <div style="margin-top:8px;font-size:12px;color:#2d89ef;cursor:pointer;" onclick="switchReminderTab('edit')">
+      ✏️ Edit this message
+    </div>
+  </div>
 
-<!-- Progress -->
-<div class="send-progress" id="reminderProgress"></div>
+  <!-- Student info -->
+  <div id="reminderStudentInfo"
+    style="font-size:13px;color:#555;background:#f0f7ff;border:1px solid #c5e0fb;border-radius:8px;padding:10px 14px;margin-bottom:12px;"></div>
 
-<div class="modal-actions">
-  <button class="cancel-btn" onclick="closeMonthlyReminderModal()">✕ Cancel</button>
-  <button style="background:#1565c0;" onclick="sendMonthlyReminders()">📲 Send to All Students</button>
+  <!-- No template warning -->
+  <div id="noTemplateWarning"
+    style="display:none;background:#fff3e0;border:1px solid #ffb74d;border-radius:8px;padding:10px 14px;font-size:13px;color:#e65100;margin-bottom:12px;">
+    ⚠ No saved template found. Please go to the <strong>Edit Template</strong> tab and save your message first.
+  </div>
+
+  <!-- Progress -->
+  <div class="send-progress" id="reminderProgress"></div>
+
+  <div class="modal-actions">
+    <button class="cancel-btn" onclick="closeMonthlyReminderModal()">✕ Close</button>
+    <button id="sendReminderBtn" style="background:#1565c0;" onclick="sendMonthlyReminders()">📲 Send to All Students</button>
+  </div>
 </div>
+
 </div>
 </div>
 
@@ -1745,34 +1792,142 @@ Please make the payment on or before the due date to avoid a late fine.
 Thank you,
 Srishti Centre for Performing Arts`;
 
-function showMonthlyReminderModal(){
-  // Set default message if textarea is empty
-  let ta = document.getElementById('reminderMsgTemplate');
-  if(!ta.value.trim()) ta.value = DEFAULT_REMINDER_MSG;
+// Tracks whether the textarea has unsaved edits
+let _templateUnsaved = false;
 
-  // Show how many students will be messaged
-  let active = students.filter(s => !s.voided);
-  document.getElementById('reminderStudentInfo').innerHTML =
-    `📋 This message will be sent to <strong>${active.length}</strong> student(s).`;
-
+async function showMonthlyReminderModal(){
   document.getElementById('reminderProgress').style.display = 'none';
-  updateReminderPreview();
   document.getElementById('monthlyReminderModal').classList.add('active');
+  // Always open on Edit tab so user sees current template
+  switchReminderTab('edit');
+  await loadSavedTemplate();
 }
 
 function closeMonthlyReminderModal(){
   document.getElementById('monthlyReminderModal').classList.remove('active');
 }
 
+function switchReminderTab(tab){
+  let isEdit = tab === 'edit';
+  document.getElementById('reminderEditPanel').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('reminderSendPanel').style.display = isEdit ? 'none'  : 'block';
+  document.getElementById('tabEdit').style.background = isEdit ? '#2d89ef' : '#f0f4ff';
+  document.getElementById('tabEdit').style.color      = isEdit ? 'white'   : '#2d89ef';
+  document.getElementById('tabSend').style.background = isEdit ? '#f0f4ff' : '#2d89ef';
+  document.getElementById('tabSend').style.color      = isEdit ? '#2d89ef' : 'white';
+
+  if(!isEdit){
+    // Populate the send tab preview & student count
+    refreshSendTab();
+  }
+}
+
+async function loadSavedTemplate(){
+  try {
+    const snap = await getDocs(collection(db, 'settings'));
+    let saved = null;
+    snap.forEach(d => { if(d.id === 'reminderTemplate') saved = d.data(); });
+
+    let ta = document.getElementById('reminderMsgTemplate');
+    if(saved && saved.message){
+      ta.value = saved.message;
+      let ts = saved.savedOn ? ` — Last saved: ${saved.savedOn}` : '';
+      document.getElementById('templateSaveStatus').innerHTML =
+        `<span style="color:#2e7d32;">✅ Template saved${ts}</span>`;
+      _templateUnsaved = false;
+    } else {
+      ta.value = DEFAULT_REMINDER_MSG;
+      document.getElementById('templateSaveStatus').innerHTML =
+        `<span style="color:#888;">Using default template — click 💾 Save Template to keep your changes.</span>`;
+      _templateUnsaved = false;
+    }
+    updateReminderPreview();
+  } catch(e){
+    console.error('loadSavedTemplate error', e);
+  }
+}
+
+async function saveReminderTemplate(){
+  let msg = document.getElementById('reminderMsgTemplate').value.trim();
+  if(!msg){ alert('Message cannot be empty.'); return; }
+
+  let btn = document.getElementById('saveTemplateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  let savedOn = new Date().toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  await setDoc(doc(db,'settings','reminderTemplate'),{
+    message: msg,
+    savedOn: savedOn
+  });
+
+  _templateUnsaved = false;
+  document.getElementById('templateSaveStatus').innerHTML =
+    `<span style="color:#2e7d32;">✅ Template saved — ${savedOn}</span>`;
+
+  btn.disabled = false;
+  btn.textContent = '💾 Save Template';
+  showToast('✅ Template saved!');
+}
+
+function markUnsaved(){
+  if(!_templateUnsaved){
+    _templateUnsaved = true;
+    document.getElementById('templateSaveStatus').innerHTML =
+      `<span style="color:#e65100;">⚠ Unsaved changes — click 💾 Save Template</span>`;
+  }
+}
+
+function resetToDefaultTemplate(){
+  if(!confirm('Reset to the default message template?')) return;
+  document.getElementById('reminderMsgTemplate').value = DEFAULT_REMINDER_MSG;
+  updateReminderPreview();
+  markUnsaved();
+}
+
+function refreshSendTab(){
+  let ta       = document.getElementById('reminderMsgTemplate');
+  let template = ta.value.trim();
+  let active   = students.filter(s => !s.voided);
+
+  let noWarn  = document.getElementById('noTemplateWarning');
+  let sendBtn = document.getElementById('sendReminderBtn');
+
+  if(!template){
+    noWarn.style.display  = 'block';
+    sendBtn.disabled      = true;
+    document.getElementById('reminderSendPreview').textContent = '—';
+  } else {
+    noWarn.style.display  = 'none';
+    sendBtn.disabled      = false;
+
+    // Show preview for first student
+    let sample = active[0] || {
+      name:'Sample Student', fee:'1500', course:'Bharatanatyam',
+      due: new Date().toISOString().slice(0,10)
+    };
+    document.getElementById('reminderSendPreview').textContent =
+      buildReminderMessage(template, sample);
+
+    // Saved badge
+    let statusEl = document.getElementById('templateSaveStatus');
+    document.getElementById('templateSavedBadge').textContent =
+      _templateUnsaved ? '⚠ Unsaved edits' : '✅ Saved';
+  }
+
+  document.getElementById('reminderStudentInfo').innerHTML =
+    `📋 Ready to send to <strong>${active.length}</strong> student(s). A WhatsApp window will open for each.`;
+  document.getElementById('reminderProgress').style.display = 'none';
+}
+
 function buildReminderMessage(template, student){
-  // Get due date formatted nicely
   let dueFormatted = student.due
     ? new Date(student.due).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
     : '—';
   let monthName = student.due
     ? new Date(student.due).toLocaleString('en-IN',{month:'long',year:'numeric'})
     : '—';
-
   return template
     .replace(/\{name\}/g,     student.name     || '—')
     .replace(/\{fee\}/g,      student.fee      || '0')
@@ -1783,38 +1938,43 @@ function buildReminderMessage(template, student){
 
 function updateReminderPreview(){
   let template = document.getElementById('reminderMsgTemplate').value;
-  let preview  = document.getElementById('reminderPreview');
-  // Use first non-voided student as sample, or a dummy
-  let sample = students.find(s => !s.voided) || {
+  let sample   = students.find(s => !s.voided) || {
     name:'Sample Student', fee:'1500', course:'Bharatanatyam',
     due: new Date().toISOString().slice(0,10)
   };
-  preview.textContent = buildReminderMessage(template, sample);
+  document.getElementById('reminderPreview').textContent =
+    buildReminderMessage(template, sample);
 }
 
 function insertTag(tag){
-  let ta = document.getElementById('reminderMsgTemplate');
+  let ta    = document.getElementById('reminderMsgTemplate');
   let start = ta.selectionStart;
   let end   = ta.selectionEnd;
-  let val   = ta.value;
-  ta.value  = val.slice(0, start) + tag + val.slice(end);
+  ta.value  = ta.value.slice(0, start) + tag + ta.value.slice(end);
   ta.selectionStart = ta.selectionEnd = start + tag.length;
   ta.focus();
   updateReminderPreview();
+  markUnsaved();
 }
 
 function sendMonthlyReminders(){
   let template = document.getElementById('reminderMsgTemplate').value.trim();
-  if(!template){ alert('Please write a message first.'); return; }
+  if(!template){ alert('No template found. Please save a message first.'); return; }
 
   let active = students.filter(s => !s.voided);
   if(active.length === 0){ alert('No students to message.'); return; }
 
-  let ok = confirm(`Send WhatsApp reminders to ${active.length} student(s)?\n\nA new WhatsApp tab will open for each student.`);
-  if(!ok) return;
+  if(_templateUnsaved){
+    let ok = confirm('⚠ You have unsaved changes to the template.\n\nSend using the current (unsaved) message anyway?');
+    if(!ok) return;
+  } else {
+    let ok = confirm(`Send WhatsApp reminders to ${active.length} student(s)?`);
+    if(!ok) return;
+  }
 
   let progress = document.getElementById('reminderProgress');
   progress.style.display = 'block';
+  document.getElementById('sendReminderBtn').disabled = true;
 
   let delay = 0;
   active.forEach((s, i) => {
@@ -1827,18 +1987,22 @@ function sendMonthlyReminders(){
       if(i === active.length - 1){
         setTimeout(()=>{
           progress.innerHTML = `✅ Done! Reminder sent to ${active.length} student(s).`;
+          document.getElementById('sendReminderBtn').disabled = false;
         }, 800);
       }
     }, delay);
-    delay += 600; // small stagger so browser doesn't block pop-ups
+    delay += 600;
   });
 }
 
-window.showMonthlyReminderModal = showMonthlyReminderModal;
+window.showMonthlyReminderModal  = showMonthlyReminderModal;
 window.closeMonthlyReminderModal = closeMonthlyReminderModal;
-window.insertTag = insertTag;
-window.updateReminderPreview = updateReminderPreview;
-window.sendMonthlyReminders = sendMonthlyReminders;
+window.switchReminderTab         = switchReminderTab;
+window.saveReminderTemplate      = saveReminderTemplate;
+window.resetToDefaultTemplate    = resetToDefaultTemplate;
+window.insertTag                 = insertTag;
+window.updateReminderPreview     = updateReminderPreview;
+window.sendMonthlyReminders      = sendMonthlyReminders;
 
 
 window.markPaid=markPaid;
