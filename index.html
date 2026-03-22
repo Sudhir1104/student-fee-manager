@@ -416,6 +416,57 @@ background:#00796b;
 background:#004d40 !important;
 }
 
+.monthly-reminder-btn{
+background:#1565c0;
+}
+
+.monthly-reminder-btn:hover{
+background:#0d47a1 !important;
+}
+
+.tag-chip{
+display:inline-block;
+background:#e3f2fd;
+color:#1565c0;
+border:1px solid #90caf9;
+border-radius:20px;
+padding:3px 10px;
+font-size:12px;
+margin:2px;
+cursor:pointer;
+font-family:monospace;
+transition:background 0.15s;
+}
+
+.tag-chip:hover{
+background:#bbdefb;
+}
+
+.preview-bubble{
+background:#dcf8c6;
+border-radius:12px 12px 12px 2px;
+padding:14px 16px;
+font-size:13px;
+white-space:pre-wrap;
+line-height:1.6;
+color:#222;
+border:1px solid #c3e6a8;
+max-height:200px;
+overflow-y:auto;
+font-family:Arial,sans-serif;
+}
+
+.send-progress{
+background:#f0f7ff;
+border:1px solid #c5e0fb;
+border-radius:8px;
+padding:10px 14px;
+font-size:13px;
+color:#1565c0;
+margin-top:10px;
+display:none;
+}
+
 .rollover-warning{
 background:#fff3e0;
 border:2px solid #ff9800;
@@ -549,6 +600,55 @@ color:#1b5fbf;
 <button class="import-file-btn" onclick="document.getElementById('importFile').click()">📂 Import from Excel</button>
 <button class="update-due-btn" onclick="showUpdateDueModal()">📅 Update All Due Dates</button>
 <button class="records-btn" onclick="showMonthlyRecordsModal()">📊 Monthly Records</button>
+<button class="monthly-reminder-btn" onclick="showMonthlyReminderModal()">📲 Send Monthly Fee Reminder</button>
+
+<!-- Monthly Fee Reminder Modal -->
+<div class="modal-overlay" id="monthlyReminderModal">
+<div class="modal">
+<h3>📲 Send Monthly Fee Reminder</h3>
+<div class="modal-hint">
+  Write your message below. Use the tags to insert student details automatically.<br>
+  A separate WhatsApp message will open for each student.
+</div>
+
+<!-- Tag chips -->
+<div style="margin-bottom:10px;">
+  <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:5px;">Click a tag to insert at cursor:</div>
+  <span class="tag-chip" onclick="insertTag('{name}')">👤 {name}</span>
+  <span class="tag-chip" onclick="insertTag('{fee}')">💰 {fee}</span>
+  <span class="tag-chip" onclick="insertTag('{due_date}')">📅 {due_date}</span>
+  <span class="tag-chip" onclick="insertTag('{course}')">📚 {course}</span>
+  <span class="tag-chip" onclick="insertTag('{month}')">🗓 {month}</span>
+</div>
+
+<!-- Editable message -->
+<div style="margin-bottom:12px;">
+  <label style="font-size:13px;font-weight:bold;color:#555;display:block;margin-bottom:6px;">Message Template</label>
+  <textarea id="reminderMsgTemplate" rows="9"
+    style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid #2d89ef;border-radius:8px;font-size:14px;line-height:1.6;resize:vertical;font-family:Arial,sans-serif;"
+    oninput="updateReminderPreview()"></textarea>
+</div>
+
+<!-- Live preview -->
+<div style="margin-bottom:14px;">
+  <div style="font-size:12px;font-weight:bold;color:#555;margin-bottom:6px;">
+    👁 Preview <span style="font-weight:normal;color:#888;">(shown for first student)</span>
+  </div>
+  <div class="preview-bubble" id="reminderPreview">—</div>
+</div>
+
+<!-- Student count info -->
+<div id="reminderStudentInfo" style="font-size:13px;color:#555;margin-bottom:10px;"></div>
+
+<!-- Progress -->
+<div class="send-progress" id="reminderProgress"></div>
+
+<div class="modal-actions">
+  <button class="cancel-btn" onclick="closeMonthlyReminderModal()">✕ Cancel</button>
+  <button style="background:#1565c0;" onclick="sendMonthlyReminders()">📲 Send to All Students</button>
+</div>
+</div>
+</div>
 
 <!-- Update Due Date Modal -->
 <div class="modal-overlay" id="updateDueModal">
@@ -1628,7 +1728,119 @@ function showToast(msg){
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2000);
 }
 
-window.addStudent=addStudent;
+// ── Monthly Fee Reminder ──────────────────────────────────────────────────
+
+const DEFAULT_REMINDER_MSG =
+`Dear Parent,
+
+This is a friendly reminder that the monthly fee for *{name}* is now due.
+
+📚 Course: {course}
+💰 Fee: ₹{fee}
+📅 Due Date: {due_date}
+🗓 Month: {month}
+
+Please make the payment on or before the due date to avoid a late fine.
+
+Thank you,
+Srishti Centre for Performing Arts`;
+
+function showMonthlyReminderModal(){
+  // Set default message if textarea is empty
+  let ta = document.getElementById('reminderMsgTemplate');
+  if(!ta.value.trim()) ta.value = DEFAULT_REMINDER_MSG;
+
+  // Show how many students will be messaged
+  let active = students.filter(s => !s.voided);
+  document.getElementById('reminderStudentInfo').innerHTML =
+    `📋 This message will be sent to <strong>${active.length}</strong> student(s).`;
+
+  document.getElementById('reminderProgress').style.display = 'none';
+  updateReminderPreview();
+  document.getElementById('monthlyReminderModal').classList.add('active');
+}
+
+function closeMonthlyReminderModal(){
+  document.getElementById('monthlyReminderModal').classList.remove('active');
+}
+
+function buildReminderMessage(template, student){
+  // Get due date formatted nicely
+  let dueFormatted = student.due
+    ? new Date(student.due).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+    : '—';
+  let monthName = student.due
+    ? new Date(student.due).toLocaleString('en-IN',{month:'long',year:'numeric'})
+    : '—';
+
+  return template
+    .replace(/\{name\}/g,     student.name     || '—')
+    .replace(/\{fee\}/g,      student.fee      || '0')
+    .replace(/\{course\}/g,   student.course   || '—')
+    .replace(/\{due_date\}/g, dueFormatted)
+    .replace(/\{month\}/g,    monthName);
+}
+
+function updateReminderPreview(){
+  let template = document.getElementById('reminderMsgTemplate').value;
+  let preview  = document.getElementById('reminderPreview');
+  // Use first non-voided student as sample, or a dummy
+  let sample = students.find(s => !s.voided) || {
+    name:'Sample Student', fee:'1500', course:'Bharatanatyam',
+    due: new Date().toISOString().slice(0,10)
+  };
+  preview.textContent = buildReminderMessage(template, sample);
+}
+
+function insertTag(tag){
+  let ta = document.getElementById('reminderMsgTemplate');
+  let start = ta.selectionStart;
+  let end   = ta.selectionEnd;
+  let val   = ta.value;
+  ta.value  = val.slice(0, start) + tag + val.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + tag.length;
+  ta.focus();
+  updateReminderPreview();
+}
+
+function sendMonthlyReminders(){
+  let template = document.getElementById('reminderMsgTemplate').value.trim();
+  if(!template){ alert('Please write a message first.'); return; }
+
+  let active = students.filter(s => !s.voided);
+  if(active.length === 0){ alert('No students to message.'); return; }
+
+  let ok = confirm(`Send WhatsApp reminders to ${active.length} student(s)?\n\nA new WhatsApp tab will open for each student.`);
+  if(!ok) return;
+
+  let progress = document.getElementById('reminderProgress');
+  progress.style.display = 'block';
+
+  let delay = 0;
+  active.forEach((s, i) => {
+    setTimeout(() => {
+      let phone   = cleanPhone(s.phone);
+      let message = buildReminderMessage(template, s);
+      let url     = 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(message);
+      window.open(url, '_blank');
+      progress.innerHTML = `📲 Sending… ${i+1} / ${active.length} — <strong>${s.name}</strong>`;
+      if(i === active.length - 1){
+        setTimeout(()=>{
+          progress.innerHTML = `✅ Done! Reminder sent to ${active.length} student(s).`;
+        }, 800);
+      }
+    }, delay);
+    delay += 600; // small stagger so browser doesn't block pop-ups
+  });
+}
+
+window.showMonthlyReminderModal = showMonthlyReminderModal;
+window.closeMonthlyReminderModal = closeMonthlyReminderModal;
+window.insertTag = insertTag;
+window.updateReminderPreview = updateReminderPreview;
+window.sendMonthlyReminders = sendMonthlyReminders;
+
+
 window.markPaid=markPaid;
 window.deleteStudent=deleteStudent;
 window.editStudent=editStudent;
