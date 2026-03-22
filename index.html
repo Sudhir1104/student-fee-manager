@@ -1314,22 +1314,27 @@ async function confirmUpdateDue(){
     btn.textContent = 'Resetting students…';
   }
 
-  // ── Step 3: Update due dates (+ reset payment status if rollover) ────
+  // ── Step 3: Update due dates + ALWAYS reset payment status ────────────
+  // Any due date change starts a fresh cycle — clear paid, voided, receipts
   let count = 0;
   for(let s of students){
-    let update = { due: newDue };
-    if(isRollover){
-      // Reset payment status for new month
-      update.paid        = false;
-      update.paidDate    = null;
-      update.receiptNumber = null;
-      update.voided      = false;
-      update.voidedDate  = null;
-      update.remark      = '';
-    }
+    let update = {
+      due:           newDue,
+      paid:          false,
+      paidDate:      null,
+      receiptNumber: null,
+      voided:        false,
+      voidedDate:    null,
+      remark:        ''
+    };
     await updateDoc(doc(db,"students",s.id), update);
     count++;
   }
+
+  // ── Step 4: Zero dashboard cards immediately ──────────────────────────
+  document.getElementById('collected').innerText = 'Collected: ₹0';
+  document.getElementById('pending').innerText   = 'Pending: ₹0';
+  document.getElementById('overdue').innerText   = 'Overdue: 0';
 
   closeUpdateDueModal();
 
